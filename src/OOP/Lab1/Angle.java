@@ -5,11 +5,11 @@ package OOP.Lab1;
  - хранить внутреннее состоние угла в радианах                                              DONE
  - возможность создания угла в радианах и градусах                                          DONE
  - реализовать присваивание и получение угла в раддианах и градусах                         DONE
- - реализовать сранение углов с учелом, что 2 Pi*N + x = x, где Pi=3.14.1529..., N-целое
- - релизовать перобразование угла в строку, float, int, str
+ - реализовать сранение углов с учелом, что 2 Pi*N + x = x, где Pi=3.14.1529..., N-целое    DONE
+ - релизовать перобразование угла в строку, float, int, str                                 DONE
  - реализовать сравнение углов                                                              DONE
  - реализовать сложение (в том числе с float и int, считая, что они заданы в радианах),
-   вычитание (считая, что они заданы в радианах), умножение на и деление на число углов
+   вычитание (считая, что они заданы в радианах), умножение на и деление на число углов     DONE
  - реализовать строкове представление объекта (str, repr)                                   DONE
  */
 
@@ -17,39 +17,34 @@ package OOP.Lab1;
 public class Angle implements Comparable<Angle>
 {
     float radians;
-    float degrees;
 
     // region Constructors
     public Angle()
     {
         this.radians = 0;
-        this.degrees = 0;
     }
 
-    private Angle(float radians, float degrees)
+    private Angle(float radians)
     {
         this.radians = radians;
-        this.degrees = degrees;
     }
 
     public static Angle fromRadians(float radians)
     {
         radians = normalizeRadians(radians);
-        float degrees = (float) Math.toDegrees(radians);
-        return new Angle(radians, degrees);
+        return new Angle(radians);
     }
 
     public static Angle fromDegrees(float degrees)
     {
         degrees = normalizeDegrees(degrees);
         float radians = (float) Math.toRadians(degrees);
-        return new Angle(radians, degrees);
+        return new Angle(radians);
     }
 
     public Angle(Angle original)
     {
         this.radians = original.radians;
-        this.degrees = original.degrees;
     }
     // endregion
 
@@ -57,22 +52,22 @@ public class Angle implements Comparable<Angle>
     @Override
     public int compareTo(Angle other)
     {
-        return Float.compare(this.degrees, other.degrees);
+        return Float.compare(this.radians, other.radians);
     }
 
     //region Adding
     public Angle add(Angle other)
     {
-        float newDegrees = this.degrees + other.degrees;
-        return Angle.fromDegrees(newDegrees);
+        float newRadians = this.radians + other.radians;
+        return Angle.fromRadians(newRadians);
     }
 
-    public Angle addDegrees(float degrees)
+    public Angle add(float radians)
     {
-       return this.add(Angle.fromDegrees(degrees));
+        return this.add(Angle.fromRadians(radians));
     }
 
-    public Angle addRadians(float radians)
+    public Angle add(int radians)
     {
         return this.add(Angle.fromRadians(radians));
     }
@@ -86,16 +81,16 @@ public class Angle implements Comparable<Angle>
     // region Substraction
     public Angle subtract(Angle other)
     {
-        float newDegrees = this.degrees - other.degrees;
-        return Angle.fromDegrees(newDegrees);
+        float newRadians = this.radians - other.radians;
+        return Angle.fromRadians(newRadians);
     }
 
-    public Angle subtractDegrees(float degrees)
+    public Angle subtract(float radians)
     {
-        return this.subtract(Angle.fromDegrees(degrees));
+        return this.subtract(Angle.fromRadians(radians));
     }
 
-    public Angle subtractRadians(float radians)
+    public Angle subtract(int radians)
     {
         return this.subtract(Angle.fromRadians(radians));
     }
@@ -109,41 +104,51 @@ public class Angle implements Comparable<Angle>
     // region Multiplication
     public Angle multiply(float number)
     {
-        float newDegrees = this.degrees * number;
-        return Angle.fromDegrees(newDegrees);
+        float newRadians = this.radians * number;
+        return Angle.fromRadians(newRadians);
     }
 
     public Angle multiply(int number)
     {
-        float newDegrees = this.degrees * number;
-        return Angle.fromDegrees(newDegrees);
+        float newRadians = this.radians * number;
+        return Angle.fromRadians(newRadians);
     }
     // endregion
 
     // region Division
     public Angle divide(float number)
     {
-        float newDegrees = this.degrees / number;
-        return Angle.fromDegrees(newDegrees);
+        float newRadians = this.radians / number;
+        return Angle.fromRadians(newRadians);
     }
 
     public Angle divide(int number)
     {
-        float newDegrees = this.degrees / number;
-        return Angle.fromDegrees(newDegrees);
+        float newRadians = this.radians / number;
+        return Angle.fromRadians(newRadians);
     }
     // endregion
-
-
-
     // endregion
 
+    // region Representation
     @Override
     public String toString()
     {
-        return "Angle {radians ='" + radians + "', degrees = '" + degrees + "'}";
+        return radians + " radians";
     }
 
+    public float toFloat()
+    {
+        return radians;
+    }
+
+    public int toInt()
+    {
+        return (int) radians;
+    }
+    // endregion
+
+    // region Normalization
     private static float normalizeDegrees(float degrees)
     {
         if (degrees >= 0 && degrees < 360) {
@@ -168,6 +173,7 @@ public class Angle implements Comparable<Angle>
 
         return normalized < 0 ? normalized + twoPI : normalized;
     }
+    // endregion
 
     // region Getters and Setters
     public float getRadians()
@@ -178,19 +184,16 @@ public class Angle implements Comparable<Angle>
     public void setRadians(float radians)
     {
         this.radians = normalizeRadians(radians);
-        degrees = (float) Math.toDegrees(radians);
     }
 
     public float getDegrees()
     {
-        return degrees;
+        return (float) Math.toDegrees(radians);
     }
 
     public void setDegrees(float degrees)
     {
-        this.degrees = normalizeDegrees(degrees);
-        radians = (float) Math.toRadians(degrees);
+        radians = normalizeRadians((float) Math.toRadians(degrees));
     }
     // endregion
-
 }
