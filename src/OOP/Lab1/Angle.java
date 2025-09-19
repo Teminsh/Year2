@@ -16,7 +16,7 @@ package OOP.Lab1;
 
 public class Angle implements Comparable<Angle>
 {
-    float radians;
+    private float radians;
 
     // region Constructors
     public Angle()
@@ -26,18 +26,16 @@ public class Angle implements Comparable<Angle>
 
     private Angle(float radians)
     {
-        this.radians = radians;
+        this.radians = normalizeRadians(radians);
     }
 
     public static Angle fromRadians(float radians)
     {
-        radians = normalizeRadians(radians);
         return new Angle(radians);
     }
 
     public static Angle fromDegrees(float degrees)
     {
-        degrees = normalizeDegrees(degrees);
         float radians = (float) Math.toRadians(degrees);
         return new Angle(radians);
     }
@@ -49,11 +47,29 @@ public class Angle implements Comparable<Angle>
     // endregion
 
     // region Operations
+
+    // region Comparing
     @Override
     public int compareTo(Angle other)
     {
         return Float.compare(this.radians, other.radians);
     }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+        {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass())
+        {
+            return false;
+        }
+        Angle other = (Angle) obj;
+        return Math.abs(this.radians - other.radians) < 1e-6f;
+    }
+    // endregion
 
     //region Adding
     public Angle add(Angle other)
@@ -102,29 +118,37 @@ public class Angle implements Comparable<Angle>
     // endregion
 
     // region Multiplication
-    public Angle multiply(float number)
+    public Angle multiply(float multiplier)
     {
-        float newRadians = this.radians * number;
+        float newRadians = this.radians * multiplier;
         return Angle.fromRadians(newRadians);
     }
 
-    public Angle multiply(int number)
+    public Angle multiply(int multiplier)
     {
-        float newRadians = this.radians * number;
+        float newRadians = this.radians * multiplier;
         return Angle.fromRadians(newRadians);
     }
     // endregion
 
     // region Division
-    public Angle divide(float number)
+    public Angle divide(float divisor)
     {
-        float newRadians = this.radians / number;
+        if (Math.abs(divisor) < 1e-6f)
+        {
+            throw new ArithmeticException("Division by zero");
+        }
+        float newRadians = this.radians / divisor;
         return Angle.fromRadians(newRadians);
     }
 
-    public Angle divide(int number)
+    public Angle divide(int divisor)
     {
-        float newRadians = this.radians / number;
+        if (Math.abs(divisor) < 1e-6f)
+        {
+            throw new ArithmeticException("Division by zero");
+        }
+        float newRadians = this.radians / divisor;
         return Angle.fromRadians(newRadians);
     }
     // endregion
@@ -135,6 +159,11 @@ public class Angle implements Comparable<Angle>
     public String toString()
     {
         return radians + " radians";
+    }
+
+    public String toReprString()
+    {
+        return String.format("Angle(radians=%f, degrees=%f)", radians, getDegrees());
     }
 
     public float toFloat()
@@ -149,17 +178,6 @@ public class Angle implements Comparable<Angle>
     // endregion
 
     // region Normalization
-    private static float normalizeDegrees(float degrees)
-    {
-        if (degrees >= 0 && degrees < 360) {
-            return degrees;
-        }
-
-        float normalized = degrees % 360;
-
-        return normalized < 0 ? normalized + 360 : normalized;
-    }
-
     private static float normalizeRadians(float radians)
     {
         if (radians < Math.PI)

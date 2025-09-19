@@ -16,6 +16,7 @@ import java.util.Stack;
 
 Пример входа:
 ()[({}())]
+
  */
 
 public class Main
