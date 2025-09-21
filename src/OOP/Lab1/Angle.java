@@ -180,16 +180,14 @@ public class Angle implements Comparable<Angle>
     // region Normalization
     private static float normalizeRadians(float radians)
     {
-        if (radians < Math.PI)
+        if (radians < Math.PI && radians >= 0)
         {
             return radians;
         }
 
         float twoPI = (float) (Math.PI * 2);
 
-        float normalized = radians % twoPI;
-
-        return normalized < 0 ? normalized + twoPI : normalized;
+        return radians % twoPI;
     }
     // endregion
 
