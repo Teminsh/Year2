@@ -17,7 +17,7 @@ import java.util.Stack;
 Пример входа:
 ()[({}())]
 
- */
+*/
 
 public class Main
 {
@@ -33,12 +33,11 @@ public class Main
             System.out.println("Строка не существует!");
             return;
         }
-        
+
         if (checkAllBrackets(input))
         {
             System.out.println("Строка существует!");
-        }
-        else
+        } else
         {
             System.out.println("Строка не существует!");
         }
@@ -49,13 +48,12 @@ public class Main
     {
         Stack<Character> stack = new Stack<>();
 
-        for (char c: input.toCharArray())
+        for (char c : input.toCharArray())
         {
             if (isOpeningBracket(c))
             {
                 stack.push(c);
-            }
-            else if (isClosingBracket(c))
+            } else if (isClosingBracket(c))
             {
                 if (stack.isEmpty())
                 {
@@ -75,7 +73,7 @@ public class Main
 
     private static boolean isMatchingPair(char openBracket, char closeBracket)
     {
-        return  (openBracket == '(' && closeBracket == ')') ||
+        return (openBracket == '(' && closeBracket == ')') ||
                 (openBracket == '[' && closeBracket == ']') ||
                 (openBracket == '{' && closeBracket == '}');
     }
@@ -105,8 +103,7 @@ public class Main
                     return false;
                 }
                 stack.push(c);
-            }
-            else if (c == closeBracket)
+            } else if (c == closeBracket)
             {
                 if (stack.isEmpty())
                 {

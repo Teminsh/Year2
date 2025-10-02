@@ -12,31 +12,42 @@ package ADS.Lab2;
 Замечание:
 Программа также должна делать "проверку на дурака": нет деления на 0,
 все скобки стоят верно (см лабу №1) и т.п.
- */
+*/
 
 import java.util.Scanner;
 
-import static ADS.Lab1.Main.checkBrackets;
-
 public class Main
 {
-    public static void main(String[] args)
+    static void main()
     {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.print("Enter arithmetical expression - ");
-        String expression = scanner.nextLine();
+        System.out.println("Калькулятор арифметических выражений");
+        System.out.println("Поддерживаемые операции: +, -, *, /, ()");
+        System.out.println("Введите выражение (завершите знаком =):");
 
-        if (expression.isEmpty())
+        try
         {
-            System.out.println("There is nothing to calculate!");
-            return;
-        }
-        if (!checkBrackets(expression, '(' , ')'))
-        {
-            System.out.println("There is nothing to calculate!");
-            return;
-        }
+            String input = scanner.nextLine();
 
+            // Предварительная проверка скобок
+            if (!ArithmeticExpressionCalculator.checkBrackets(input))
+            {
+                System.out.println("Ошибка: неверно расставлены скобки!");
+                return;
+            }
+
+            ArithmeticExpressionCalculator calculator = new ArithmeticExpressionCalculator(input);
+            double result = calculator.calculate();
+
+            System.out.println("Результат: " + result);
+
+        } catch (Exception e)
+        {
+            System.out.println("Ошибка вычисления: " + e.getMessage());
+        } finally
+        {
+            scanner.close();
+        }
     }
 }

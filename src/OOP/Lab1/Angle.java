@@ -19,6 +19,7 @@ public class Angle implements Comparable<Angle>
     private float radians;
 
     // region Constructors
+
     public Angle()
     {
         this.radians = 0;
@@ -44,11 +45,13 @@ public class Angle implements Comparable<Angle>
     {
         this.radians = original.radians;
     }
+
     // endregion
 
     // region Operations
 
     // region Comparing
+
     @Override
     public int compareTo(Angle other)
     {
@@ -69,9 +72,11 @@ public class Angle implements Comparable<Angle>
         Angle other = (Angle) obj;
         return Math.abs(this.radians - other.radians) < 1e-6f;
     }
+
     // endregion
 
     //region Adding
+
     public Angle add(Angle other)
     {
         float newRadians = this.radians + other.radians;
@@ -92,9 +97,11 @@ public class Angle implements Comparable<Angle>
     {
         return angle1.add(angle2);
     }
+
     //endregion
 
     // region Substraction
+
     public Angle subtract(Angle other)
     {
         float newRadians = this.radians - other.radians;
@@ -115,9 +122,11 @@ public class Angle implements Comparable<Angle>
     {
         return angle1.subtract(angle2);
     }
+
     // endregion
 
     // region Multiplication
+
     public Angle multiply(float multiplier)
     {
         float newRadians = this.radians * multiplier;
@@ -129,9 +138,11 @@ public class Angle implements Comparable<Angle>
         float newRadians = this.radians * multiplier;
         return Angle.fromRadians(newRadians);
     }
+
     // endregion
 
     // region Division
+
     public Angle divide(float divisor)
     {
         if (Math.abs(divisor) < 1e-6f)
@@ -151,10 +162,13 @@ public class Angle implements Comparable<Angle>
         float newRadians = this.radians / divisor;
         return Angle.fromRadians(newRadians);
     }
+
     // endregion
+
     // endregion
 
     // region Representation
+
     @Override
     public String toString()
     {
@@ -175,9 +189,11 @@ public class Angle implements Comparable<Angle>
     {
         return (int) radians;
     }
+
     // endregion
 
     // region Normalization
+
     private static float normalizeRadians(float radians)
     {
         if (radians < Math.PI && radians >= 0)
@@ -189,9 +205,11 @@ public class Angle implements Comparable<Angle>
 
         return radians % twoPI;
     }
+
     // endregion
 
     // region Getters and Setters
+
     public float getRadians()
     {
         return radians;
@@ -211,5 +229,6 @@ public class Angle implements Comparable<Angle>
     {
         radians = normalizeRadians((float) Math.toRadians(degrees));
     }
+
     // endregion
 }
