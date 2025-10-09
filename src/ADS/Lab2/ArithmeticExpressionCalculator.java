@@ -1,198 +1,213 @@
 package ADS.Lab2;
 
+import java.util.Deque;
+import java.util.LinkedList;
+import java.util.Scanner;
+
 public class ArithmeticExpressionCalculator
 {
-    private String expression;
-    private int position;
-
-    public ArithmeticExpressionCalculator(String expression)
+    static void main()
     {
-        // Удаляем пробелы и знак равенства в конце
-        this.expression = expression.replaceAll("\\s", "").replaceAll("=$", "");
-        this.position = 0;
-    }
+        Scanner scanner = new Scanner(System.in);
 
-    // Основной метод для вычисления выражения
-    public double calculate() throws Exception
-    {
-        position = 0;
-        double result = parseExpression();
+        System.out.print("Введите математическое выражение (завершите знаком =): ");
+        String input = scanner.nextLine();
 
-        // Проверяем, что обработали всё выражение
-        if (position < expression.length())
+        if (input.isEmpty())
         {
-            throw new Exception("Неожиданный символ на позиции " + position + ": " + expression.charAt(position));
+            System.out.println("Строка не существует!");
+            scanner.close();
+            return;
         }
 
-        return result;
-    }
-
-    // Парсинг выражений с приоритетом + и -
-    private double parseExpression() throws Exception
-    {
-        double result = parseTerm();
-
-        while (position < expression.length())
+        if (!input.trim().endsWith("="))
         {
-            char operator = expression.charAt(position);
-            if (operator == '+' || operator == '-')
-            {
-                position++; // Пропускаем оператор
-                double nextTerm = parseTerm();
-                if (operator == '+')
-                {
-                    result += nextTerm;
-                } else
-                {
-                    result -= nextTerm;
-                }
-            } else
-            {
-                break;
-            }
+            System.out.println("Ошибка: выражение должно заканчиваться знаком '='!");
+            scanner.close();
+            return;
         }
 
-        return result;
-    }
-
-    // Парсинг термов с приоритетом * и /
-    private double parseTerm() throws Exception
-    {
-        double result = parseFactor();
-
-        while (position < expression.length())
-        {
-            char operator = expression.charAt(position);
-            if (operator == '*' || operator == '/')
-            {
-                position++; // Пропускаем оператор
-                double nextFactor = parseFactor();
-                if (operator == '*')
-                {
-                    result *= nextFactor;
-                } else
-                {
-                    // Проверка деления на ноль
-                    if (Math.abs(nextFactor) < 1e-10)
-                    {
-                        throw new Exception("Ошибка: деление на ноль!");
-                    }
-                    result /= nextFactor;
-                }
-            } else
-            {
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    // Парсинг факторов (числа, выражения в скобках, унарный минус)
-    private double parseFactor() throws Exception
-    {
-        if (position >= expression.length())
-        {
-            throw new Exception("Неожиданный конец выражения");
-        }
-
-        char currentChar = expression.charAt(position);
-
-        // Обработка унарного минуса
-        if (currentChar == '-')
-        {
-            position++;
-            return -parseFactor();
-        }
-
-        // Обработка унарного плюса
-        if (currentChar == '+')
-        {
-            position++;
-            return parseFactor();
-        }
-
-        // Обработка скобок
-        if (currentChar == '(')
-        {
-            position++; // Пропускаем открывающую скобку
-            double result = parseExpression();
-
-            // Проверяем закрывающую скобку
-            if (position >= expression.length() || expression.charAt(position) != ')')
-            {
-                throw new Exception("Ошибка: отсутствует закрывающая скобка ')'");
-            }
-            position++; // Пропускаем закрывающую скобку
-            return result;
-        }
-
-        // Парсинг числа
-        return parseNumber();
-    }
-
-    // Парсинг чисел (целых и дробных)
-    private double parseNumber() throws Exception
-    {
-        if (position >= expression.length())
-        {
-            throw new Exception("Ожидалось число");
-        }
-
-        int start = position;
-
-        // Читаем цифры до точки
-        while (position < expression.length() && Character.isDigit(expression.charAt(position)))
-        {
-            position++;
-        }
-
-        // Обрабатываем дробную часть
-        if (position < expression.length() && expression.charAt(position) == '.')
-        {
-            position++; // Пропускаем точку
-
-            // Читаем цифры после точки
-            while (position < expression.length() && Character.isDigit(expression.charAt(position)))
-            {
-                position++;
-            }
-        }
-
-        // Проверяем, что мы считали хотя бы одну цифру
-        if (start == position)
-        {
-            throw new Exception("Ожидалось число на позиции " + position);
-        }
-
-        // Преобразуем строку в число
         try
         {
-            return Double.parseDouble(expression.substring(start, position));
-        } catch (NumberFormatException e)
-        {
-            throw new Exception("Некорректное число: " + expression.substring(start, position));
+            String expression = input.replaceAll("\\s", "").replaceAll("=$", "");
+
+            String postfix = infixToPostfix(expression);
+
+            double result = evaluatePostfix(postfix);
+
+            System.out.println("Результат: " + result);
         }
+        catch (Exception e)
+        {
+            System.out.println("Ошибка вычисления: " + e.getMessage());
+        }
+
+        scanner.close();
     }
 
-    // Дополнительная проверка корректности скобок
-    public static boolean checkBrackets(String expression)
+    private static int getPrecedence(char operator)
     {
-        int count = 0;
-        for (char c : expression.toCharArray())
+        return switch (operator)
         {
+            case '+', '-' -> 1;
+            case '*', '/' -> 2;
+            default -> 0;
+        };
+    }
+
+    private static boolean isOperator(char c)
+    {
+        return c == '+' || c == '-' || c == '*' || c == '/';
+    }
+
+
+    private static String infixToPostfix(String infix) throws Exception
+    {
+        StringBuilder output = new StringBuilder();
+        Deque<Character> operatorStack = new LinkedList<>();
+
+        int i = 0;
+        while (i < infix.length())
+        {
+            char c = infix.charAt(i);
+
+            if (Character.isDigit(c))
+            {
+                StringBuilder number = new StringBuilder();
+                while (i < infix.length() &&
+                        (Character.isDigit(infix.charAt(i)) || infix.charAt(i) == '.'))
+                {
+                    number.append(infix.charAt(i));
+                    i++;
+                }
+                output.append(number).append(' ');
+                continue;
+            }
+
             if (c == '(')
             {
-                count++;
-            } else if (c == ')')
+                operatorStack.push(c);
+                i++;
+                continue;
+            }
+
+            if (c == ')')
             {
-                count--;
-                if (count < 0)
+                while (!operatorStack.isEmpty() && operatorStack.peek() != '(')
                 {
-                    return false; // Больше закрывающих скобок
+                    output.append(operatorStack.pop()).append(' ');
                 }
+
+                if (operatorStack.isEmpty())
+                {
+                    throw new Exception("Неверно расставлены скобки!");
+                }
+
+                operatorStack.pop();
+                i++;
+                continue;
+            }
+
+            if (isOperator(c))
+            {
+                if ((c == '-' || c == '+') &&
+                        (i == 0 || infix.charAt(i - 1) == '(' || isOperator(infix.charAt(i - 1))))
+                {
+                    if (c == '-')
+                    {
+                        output.append("0 ");
+                    }
+                    i++;
+                    continue;
+                }
+
+                while (!operatorStack.isEmpty() &&
+                        operatorStack.peek() != '(' &&
+                        getPrecedence(operatorStack.peek()) >= getPrecedence(c))
+                {
+                    output.append(operatorStack.pop()).append(' ');
+                }
+
+                operatorStack.push(c);
+                i++;
+                continue;
+            }
+
+            throw new Exception("Неожиданный символ: " + c);
+        }
+
+        while (!operatorStack.isEmpty())
+        {
+            char op = operatorStack.pop();
+            if (op == '(' || op == ')')
+            {
+                throw new Exception("Неверно расставлены скобки!");
+            }
+            output.append(op).append(' ');
+        }
+
+        return output.toString().trim();
+    }
+
+    private static double evaluatePostfix(String postfix) throws Exception
+    {
+        Deque<Double> valueStack = new LinkedList<>();
+        String[] tokens = postfix.split(" ");
+
+        for (String token : tokens)
+        {
+            if (token.isEmpty())
+            {
+                continue;
+            }
+
+            if (Character.isDigit(token.charAt(0)) || (token.length() > 1 && token.charAt(0) == '-'))
+            {
+                try
+                {
+                    valueStack.push(Double.parseDouble(token));
+                } catch (NumberFormatException e)
+                {
+                    throw new Exception("Некорректное число: " + token);
+                }
+                continue;
+            }
+
+            if (isOperator(token.charAt(0)))
+            {
+                if (valueStack.size() < 2)
+                {
+                    throw new Exception("Некорректное выражение!");
+                }
+
+                double second = valueStack.pop();
+                double first = valueStack.pop();
+
+                double result = switch (token.charAt(0))
+                {
+                    case '+' -> first + second;
+                    case '-' -> first - second;
+                    case '*' -> first * second;
+                    case '/' ->
+                    {
+                        if (Math.abs(second) < 1e-10)
+                        {
+                            throw new Exception("Деление на ноль!");
+                        }
+                        yield first / second;
+                    }
+                    default -> throw new Exception("Неизвестный оператор: " + token);
+                };
+
+                valueStack.push(result);
             }
         }
-        return count == 0; // Количество открывающих должно равняться закрывающим
+
+        if (valueStack.size() != 1)
+        {
+            throw new Exception("Некорректное выражение!");
+        }
+
+        return valueStack.pop();
     }
 }
