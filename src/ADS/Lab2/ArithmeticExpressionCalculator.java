@@ -44,7 +44,6 @@ public class ArithmeticExpressionCalculator
         try
         {
             String expression = input.replaceAll("\\s", "").replaceAll("=$", "");
-
             String postfix = infixToPostfix(expression);
 
             double result = evaluatePostfix(postfix);

@@ -7,10 +7,13 @@ package OOP.Lab1;
  - реализовать возможность сравнения объектов на эквивалентность (eq)                                                               DONE
  - реализовать строковое представление объекта (str, repr)                                                                          DONE
  - реализовать получение длины промежутка (abs или отдельны метод)                                                                  DONE
- - реализовать сравнение промежутков
+- реализовать сравнение промежутков                                                                                                 DONE
  - реализовать операцию in для проверки входит один промежуток в другой или угол в промежуток                                       DONE
  - реализовать операции сложения, вычитания (результат в общем виде - список промежутков)
  */
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AngleRange implements Comparable<AngleRange>
 {
@@ -61,9 +64,9 @@ public class AngleRange implements Comparable<AngleRange>
     // region Comparing
 
     @Override
-    public int compareTo(AngleRange o)
+    public int compareTo(AngleRange other)
     {
-        return 0;
+        return Float.compare(this.abs(), other.abs());
     }
 
     @Override
@@ -78,14 +81,16 @@ public class AngleRange implements Comparable<AngleRange>
             return false;
         }
         AngleRange angleRange = (AngleRange) obj;
-        return length() == angleRange.length();
+        return this.abs() == angleRange.abs();
     }
 
     // endregion
 
+    // region In
+
     public boolean in(AngleRange other)
     {
-        return this.in(other.start) && this.in(other.end);
+        return other.in(this.start) && other.in(this.end);
     }
 
     public boolean in(Angle angle)
@@ -99,18 +104,112 @@ public class AngleRange implements Comparable<AngleRange>
         if (startRad <= endRad)
         {
             return afterStart && beforeEnd;
-        } else
+        }
+        else
         {
             return afterStart || beforeEnd;
         }
     }
+
+    public boolean in(float radians)
+    {
+        return this.in(Angle.fromRadians(radians));
+    }
+
+    public boolean in(int degrees)
+    {
+        return this.in(Angle.fromDegrees(degrees));
+    }
+
+    // endregion
+
+    // region Addition
+
+    public List<AngleRange> add(AngleRange other)
+    {
+        List<AngleRange> result = new ArrayList<>();
+        float startRad = this.start.getRadians();
+        float endRad = this.end.getRadians();
+        float otherStartRad = other.start.getRadians();
+        float otherEndRad = other.end.getRadians();
+
+        if (endRad < otherStartRad || (endRad == otherStartRad && !this.isInclusiveEnd && !other.isInclusiveStart))
+        {
+            result.add(this);
+            result.add(other);
+            return result;
+        }
+        if (otherEndRad < startRad || (otherEndRad == startRad && !other.isInclusiveEnd && !this.isInclusiveStart))
+        {
+            result.add(other);
+            result.add(this);
+            return result;
+        }
+
+        boolean newIsInclusiveStart;
+        boolean newIsInclusiveEnd;
+
+        if (startRad < otherStartRad)
+        {
+            newIsInclusiveStart = this.isInclusiveStart;
+        }
+        else if (otherStartRad < startRad)
+        {
+            newIsInclusiveStart = other.isInclusiveStart;
+        }
+        else
+        {
+            newIsInclusiveStart = this.isInclusiveStart || other.isInclusiveStart;
+        }
+
+        if (endRad < otherEndRad)
+        {
+            newIsInclusiveEnd = this.isInclusiveEnd;
+        }
+        else if (otherEndRad < endRad)
+        {
+            newIsInclusiveEnd = other.isInclusiveEnd;
+        }
+        else
+        {
+            newIsInclusiveEnd = this.isInclusiveEnd || other.isInclusiveEnd;
+        }
+
+        result.add(new AngleRange(Angle.fromRadians(Math.min(startRad, otherStartRad)),
+                Angle.fromRadians(Math.max(endRad, otherEndRad)), newIsInclusiveStart, newIsInclusiveEnd));
+
+        return result;
+    }
+
+    public static List<AngleRange> add(AngleRange firstRange, AngleRange secondRange)
+    {
+        return firstRange.add(secondRange);
+    }
+
+    // endregion
+
+    // region Subtraction
+
+    public List<AngleRange> subtract(AngleRange other)
+    {
+        List<AngleRange> result = new ArrayList<>();
+        float startRad = this.start.getRadians();
+        float endRad = this.end.getRadians();
+        float otherStartRad = other.start.getRadians();
+        float otherEndRad = other.end.getRadians();
+
+
+
+        return result;
+    }
+
+    // endregion
 
     // region Absolute value and length
 
     public float abs()
     {
         return length();
-
     }
 
     public static float abs(AngleRange angleRange)
@@ -120,13 +219,13 @@ public class AngleRange implements Comparable<AngleRange>
 
     private float length()
     {
-        float start = (float) (this.start.getRadians() - (isInclusiveStart ? Math.toRadians(1) : 0f));
-        float end = (float) (this.end.getRadians() + (isInclusiveEnd ? Math.toRadians(1) : 0f));
-
-        if (start > end)
+        float start = this.start.getRadians();
+        float end = this.end.getRadians();
+        if (start >= end)
         {
-            return (float) ((2 * Math.PI - start) + end);
-        } else
+            return start - end;
+        }
+        else
         {
             return end - start;
         }
@@ -153,5 +252,4 @@ public class AngleRange implements Comparable<AngleRange>
     }
 
     // endregion
-
 }

@@ -27,7 +27,7 @@ public class Angle implements Comparable<Angle>
 
     private Angle(float radians)
     {
-        this.radians = normalizeRadians(radians);
+        this.radians = radians;
     }
 
     public static Angle fromRadians(float radians)
@@ -75,7 +75,7 @@ public class Angle implements Comparable<Angle>
 
     // endregion
 
-    //region Adding
+    //region Addition
 
     public Angle add(Angle other)
     {
