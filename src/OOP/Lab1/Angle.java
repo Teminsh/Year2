@@ -215,9 +215,11 @@ public class Angle implements Comparable<Angle>
         return radians;
     }
 
+    public float getNormalizedRadians() { return normalizeRadians(radians); }
+
     public void setRadians(float radians)
     {
-        this.radians = normalizeRadians(radians);
+        this.radians = radians;
     }
 
     public float getDegrees()
@@ -225,9 +227,11 @@ public class Angle implements Comparable<Angle>
         return (float) Math.toDegrees(radians);
     }
 
+    public float getNormalizedDegrees() { return (float) Math.toDegrees(normalizeRadians(radians)); }
+
     public void setDegrees(float degrees)
     {
-        radians = normalizeRadians((float) Math.toRadians(degrees));
+        radians = (float) Math.toRadians(degrees);
     }
 
     // endregion

@@ -7,7 +7,7 @@ package OOP.Lab1;
  - реализовать возможность сравнения объектов на эквивалентность (eq)                                                               DONE
  - реализовать строковое представление объекта (str, repr)                                                                          DONE
  - реализовать получение длины промежутка (abs или отдельны метод)                                                                  DONE
-- реализовать сравнение промежутков                                                                                                 DONE
+ - реализовать сравнение промежутков                                                                                                DONE
  - реализовать операцию in для проверки входит один промежуток в другой или угол в промежуток                                       DONE
  - реализовать операции сложения, вычитания (результат в общем виде - список промежутков)
  */
@@ -123,23 +123,32 @@ public class AngleRange implements Comparable<AngleRange>
 
     // endregion
 
+    // region Additional Functions
+
+    private boolean isBefore(float numA, float numB, boolean isInclusiveA, boolean isInclusiveB)
+    {
+        return numA < numB || (numA == numB && !(isInclusiveA && isInclusiveB));
+    }
+
+    // endregion
+
     // region Addition
 
     public List<AngleRange> add(AngleRange other)
     {
         List<AngleRange> result = new ArrayList<>();
-        float startRad = this.start.getRadians();
-        float endRad = this.end.getRadians();
+        float thisStartRad = this.start.getRadians();
+        float thisEndRad = this.end.getRadians();
         float otherStartRad = other.start.getRadians();
         float otherEndRad = other.end.getRadians();
 
-        if (endRad < otherStartRad || (endRad == otherStartRad && !this.isInclusiveEnd && !other.isInclusiveStart))
+        if (isBefore(thisEndRad, otherStartRad, this.isInclusiveEnd, other.isInclusiveStart))
         {
             result.add(this);
             result.add(other);
             return result;
         }
-        if (otherEndRad < startRad || (otherEndRad == startRad && !other.isInclusiveEnd && !this.isInclusiveStart))
+        else if (isBefore(otherEndRad, thisStartRad, other.isInclusiveEnd, this.isInclusiveStart))
         {
             result.add(other);
             result.add(this);
@@ -149,11 +158,11 @@ public class AngleRange implements Comparable<AngleRange>
         boolean newIsInclusiveStart;
         boolean newIsInclusiveEnd;
 
-        if (startRad < otherStartRad)
+        if (thisStartRad < otherStartRad)
         {
             newIsInclusiveStart = this.isInclusiveStart;
         }
-        else if (otherStartRad < startRad)
+        else if (otherStartRad < thisStartRad)
         {
             newIsInclusiveStart = other.isInclusiveStart;
         }
@@ -162,11 +171,11 @@ public class AngleRange implements Comparable<AngleRange>
             newIsInclusiveStart = this.isInclusiveStart || other.isInclusiveStart;
         }
 
-        if (endRad < otherEndRad)
+        if (thisEndRad < otherEndRad)
         {
             newIsInclusiveEnd = this.isInclusiveEnd;
         }
-        else if (otherEndRad < endRad)
+        else if (otherEndRad < thisEndRad)
         {
             newIsInclusiveEnd = other.isInclusiveEnd;
         }
@@ -175,8 +184,8 @@ public class AngleRange implements Comparable<AngleRange>
             newIsInclusiveEnd = this.isInclusiveEnd || other.isInclusiveEnd;
         }
 
-        result.add(new AngleRange(Angle.fromRadians(Math.min(startRad, otherStartRad)),
-                Angle.fromRadians(Math.max(endRad, otherEndRad)), newIsInclusiveStart, newIsInclusiveEnd));
+        result.add(new AngleRange(Angle.fromRadians(Math.min(thisStartRad, otherStartRad)),
+                Angle.fromRadians(Math.max(thisEndRad, otherEndRad)), newIsInclusiveStart, newIsInclusiveEnd));
 
         return result;
     }
@@ -193,12 +202,36 @@ public class AngleRange implements Comparable<AngleRange>
     public List<AngleRange> subtract(AngleRange other)
     {
         List<AngleRange> result = new ArrayList<>();
-        float startRad = this.start.getRadians();
-        float endRad = this.end.getRadians();
+        float thisStartRad = this.start.getRadians();
+        float thisEndRad = this.end.getRadians();
         float otherStartRad = other.start.getRadians();
         float otherEndRad = other.end.getRadians();
 
+        float newStartRad, newEndRad;
+        boolean newIsInclusiveStart, newIsInclusiveEnd;
 
+        if (isBefore(thisEndRad, otherStartRad, this.isInclusiveEnd, other.isInclusiveStart) ||
+                isBefore(otherEndRad, thisStartRad, other.isInclusiveEnd, this.isInclusiveStart))
+        {
+            result.add(this);
+            return result;
+        }
+
+        if (isBefore(otherStartRad, thisStartRad, other.isInclusiveStart, this.isInclusiveStart) &&
+                isBefore(otherEndRad, thisEndRad, other.isInclusiveEnd, this.isInclusiveEnd))
+        {
+            return result;
+        }
+
+        if (thisStartRad < otherStartRad)
+        {
+            result.add(new AngleRange(this.start, other.start, this.isInclusiveStart, !other.isInclusiveStart));
+        }
+
+        if (otherEndRad < thisEndRad)
+        {
+            result.add(new AngleRange(otherEndRad, thisEndRad, !other.isInclusiveEnd, this.isInclusiveEnd));
+        }
 
         return result;
     }
