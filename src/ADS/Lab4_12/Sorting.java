@@ -5,9 +5,9 @@ import java.util.Arrays;
 public class Sorting
 {
 
-    // region Comb Sort
+    // region 4Comb Sort
 
-    public static void combSort(int[] arr)
+    public static void CombSort(int[] arr)
     {
         int gap = arr.length;
         boolean swapped = true;
@@ -36,7 +36,7 @@ public class Sorting
 
     //endregion
 
-    //region Insertion Sort
+    //region 5Insertion Sort
 
     public static void InsertionSort(int[] arr)
     {
@@ -56,7 +56,7 @@ public class Sorting
 
     //endregion
 
-    //region Selection Sort
+    //region 6Selection Sort
 
     public static void SelectionSort(int[] arr)
     {
@@ -79,7 +79,7 @@ public class Sorting
 
     //endregion
 
-    //region Shell Sort
+    //region 7Shell Sort
 
     public static void ShellSort(int[] arr)
     {
@@ -103,7 +103,7 @@ public class Sorting
 
     //endregion
 
-    //region Radix Sort
+    //region 8Radix Sort
 
     public static void RadixSort(int[] arr)
     {
@@ -122,7 +122,96 @@ public class Sorting
         int[] count = new int[10];
 
 
+        for (int i : arr)
+        {
+            int digit = (i / exp) % 10;
+            count[digit]++;
+        }
+
+        for (int i = 1; i < 10; i++)
+        {
+            count[i] += count[i - 1];
+        }
+
+        for (int i = n - 1; i >= 0; i--)
+        {
+            int digit = (arr[i] / exp) % 10;
+            output[count[digit] - 1] = arr[i];
+            count[digit]--;
+        }
+
+        System.arraycopy(output, 0, arr, 0, n);
     }
 
     //endregion
+
+    // region 9Heap Sort
+
+    public static void HeapSort(int[] arr)
+    {
+        int n = arr.length;
+
+        for (int i = n / 2; i >= 0; i--)
+        {
+            Heapify(arr, n, i);
+        }
+
+        for (int i = n - 1; i > 0; i--)
+        {
+            int tmp = arr[0];
+            arr[0] = arr[i];
+            arr[i] = tmp;
+
+            Heapify(arr, i ,0);
+        }
+    }
+
+    private static void Heapify(int[] arr, int n, int i)
+    {
+        int largest = i;
+        int left = i * 2 + 1;
+        int right = i * 2 + 2;
+
+        if (left < n && arr[left] > arr[largest])
+        {
+            largest = left;
+        }
+
+        if (right < n && arr[right] > arr[largest])
+        {
+            largest = right;
+        }
+
+        if (largest != i)
+        {
+            int tmp = arr[i];
+            arr[i] = arr[largest];
+            arr[largest] = tmp;
+
+            Heapify(arr, n, largest);
+        }
+    }
+
+
+    // endregion
+
+    // region 10Merge Sort
+
+    public static void MergeSort(int[] arr)
+    {
+
+    }
+
+    // endregion
+
+    // region 11Quick Sort
+
+    public static void QuickSort(int[] arr)
+    {
+
+    }
+
+    // endregion
+
+
 }
