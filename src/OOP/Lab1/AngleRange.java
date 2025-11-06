@@ -9,7 +9,7 @@ package OOP.Lab1;
  - реализовать получение длины промежутка (abs или отдельны метод)                                                                  DONE
  - реализовать сравнение промежутков                                                                                                DONE
  - реализовать операцию in для проверки входит один промежуток в другой или угол в промежуток                                       DONE
- - реализовать операции сложения, вычитания (результат в общем виде - список промежутков)
+ - реализовать операции сложения, вычитания (результат в общем виде - список промежутков)                                           DONE
  */
 
 import java.util.ArrayList;
@@ -27,22 +27,6 @@ public class AngleRange implements Comparable<AngleRange>
     public AngleRange(Angle start, Angle end)
     {
         this(start, end, true, true);
-    }
-
-    public AngleRange(Angle start, Angle end, boolean isInclusiveStart, boolean isInclusiveEnd)
-    {
-        if (start == null || end == null)
-        {
-            throw new IllegalArgumentException("Start and end cannot be null");
-        }
-        if (start.getRadians() > end.getRadians())
-        {
-            throw new IllegalArgumentException("Start of the interval can't be grater that its end");
-        }
-        this.start = start;
-        this.end = end;
-        this.isInclusiveStart = isInclusiveStart;
-        this.isInclusiveEnd = isInclusiveEnd;
     }
 
     public AngleRange(float startRadians, float endRadians)
@@ -63,6 +47,22 @@ public class AngleRange implements Comparable<AngleRange>
     public AngleRange(int startDegrees, int endDegrees, boolean isInclusiveStart, boolean isInclusiveEnd)
     {
         this(Angle.fromDegrees(startDegrees), Angle.fromDegrees(endDegrees), isInclusiveStart, isInclusiveEnd);
+    }
+
+    public AngleRange(Angle start, Angle end, boolean isInclusiveStart, boolean isInclusiveEnd)
+    {
+        if (start == null || end == null)
+        {
+            throw new IllegalArgumentException("Start and end cannot be null");
+        }
+        if (start.getRadians() > end.getRadians())
+        {
+            throw new IllegalArgumentException("Start of the interval can't be grater that its end");
+        }
+        this.start = start;
+        this.end = end;
+        this.isInclusiveStart = isInclusiveStart;
+        this.isInclusiveEnd = isInclusiveEnd;
     }
 
     // endregion
@@ -160,7 +160,7 @@ public class AngleRange implements Comparable<AngleRange>
     {
         if (numA < numB) { return true; }
         if (numA > numB) { return false; }
-        return !isInclusiveA || !isInclusiveB;
+        return !isInclusiveA && !isInclusiveB;
     }
 
     // endregion

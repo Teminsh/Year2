@@ -19,17 +19,8 @@ public class Angle implements Comparable<Angle>
     private static final float EPSILON = 1e-6f;
     private float radians;
 
-    // region Constructors
 
-    public Angle()
-    {
-        this.radians = 0;
-    }
-
-    private Angle(float radians)
-    {
-        this.radians = radians;
-    }
+    // region Static Angle Creation Methods
 
     public static Angle fromRadians(float radians)
     {
@@ -42,9 +33,23 @@ public class Angle implements Comparable<Angle>
         return new Angle(radians);
     }
 
+    // endregion
+
+    // region Constructors
+
+    public Angle()
+    {
+        this(0);
+    }
+
     public Angle(Angle original)
     {
-        this.radians = original.radians;
+        this(original.radians);
+    }
+
+    private Angle(float radians)
+    {
+        this.radians = radians;
     }
 
     // endregion
