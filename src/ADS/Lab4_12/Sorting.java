@@ -199,6 +199,71 @@ public class Sorting
 
     public static void MergeSort(int[] arr)
     {
+        if (arr.length < 2)
+        {
+            return;
+        }
+        MergeSortHelper(arr, 0, arr.length - 1);
+    }
+
+    private static void MergeSortHelper(int[] arr, int left, int right)
+    {
+        if (left < right)
+        {
+            int mid = (left + right) / 2;
+
+            MergeSortHelper(arr, left, mid);
+            MergeSortHelper(arr, mid + 1, right);
+
+            Merge(arr, left, mid, right);
+        }
+    }
+
+    private static void Merge(int[] arr, int left, int mid, int right)
+    {
+        int n1 = mid - left + 1;
+        int n2 = right - mid;
+
+        int[] leftArray = new int[n1];
+        int[] rightArray = new int[n2];
+
+        System.arraycopy(arr, left, leftArray, 0, n1);
+
+        for (int j = 0; j < n2; j++)
+        {
+            rightArray[j] = arr[mid + 1 + j];
+        }
+
+        int i = 0, j = 0, k = left;
+
+        while (i < n1 && j < n2)
+        {
+            if (leftArray[i] <= rightArray[j])
+            {
+                arr[k] = leftArray[i];
+                i++;
+            }
+            else
+            {
+                arr[k] = rightArray[j];
+                j++;
+            }
+            k++;
+        }
+
+        while (i < n1)
+        {
+            arr[k] = leftArray[i];
+            i++;
+            k++;
+        }
+
+        while (j < n2)
+        {
+            arr[k] = rightArray[j];
+            j++;
+            k++;
+        }
 
     }
 
@@ -208,7 +273,46 @@ public class Sorting
 
     public static void QuickSort(int[] arr)
     {
+        if (arr.length < 2)
+        {
+            return;
+        }
+        QuickSortHelper(arr, 0, arr.length - 1);
+    }
 
+    private static void QuickSortHelper(int[] arr, int low, int high)
+    {
+        if (low < high)
+        {
+            int partitionIndex = Partition(arr, low, high);
+
+            QuickSortHelper(arr, low, partitionIndex - 1);
+            QuickSortHelper(arr, partitionIndex + 1, high);
+        }
+    }
+
+    private static int Partition(int[] arr, int low, int high)
+    {
+        int pivot = arr[high];
+        int i = low - 1;
+
+        for (int j = low; j < high; j ++)
+        {
+            if (arr[j] <= pivot)
+            {
+                i++;
+
+                int tmp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = tmp;
+            }
+        }
+
+        int tmp = arr[i + 1];
+        arr[i + 1] = arr[high];
+        arr[high] = tmp;
+
+        return i + 1;
     }
 
     // endregion
