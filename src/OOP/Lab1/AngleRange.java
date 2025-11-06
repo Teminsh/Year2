@@ -31,6 +31,14 @@ public class AngleRange implements Comparable<AngleRange>
 
     public AngleRange(Angle start, Angle end, boolean isInclusiveStart, boolean isInclusiveEnd)
     {
+        if (start == null || end == null)
+        {
+            throw new IllegalArgumentException("Start and end cannot be null");
+        }
+        if (start.getRadians() > end.getRadians())
+        {
+            throw new IllegalArgumentException("Start of the interval can't be grater that its end");
+        }
         this.start = start;
         this.end = end;
         this.isInclusiveStart = isInclusiveStart;
@@ -66,7 +74,12 @@ public class AngleRange implements Comparable<AngleRange>
     @Override
     public int compareTo(AngleRange other)
     {
-        return Float.compare(this.abs(), other.abs());
+        int startCompare = this.start.compareTo(other.start);
+        if (startCompare != 0)
+        {
+            return startCompare;
+        }
+        return this.end.compareTo(other.end);
     }
 
     @Override
@@ -81,19 +94,37 @@ public class AngleRange implements Comparable<AngleRange>
             return false;
         }
         AngleRange angleRange = (AngleRange) obj;
-        return this.abs() == angleRange.abs();
+        return this.start.equals(angleRange.start) &&
+                this.end.equals(angleRange.end) &&
+                this.isInclusiveStart == angleRange.isInclusiveStart &&
+                this.isInclusiveEnd == angleRange.isInclusiveEnd;
     }
 
     // endregion
 
-    // region In
+    // region In and Contains
+
+    private boolean isLessOrEqual(float numA, float numB, boolean isInclusiveA, boolean isInclusiveB)
+    {
+        if (numA < numB) return true;
+        if (numA > numB) return false;
+        return !isInclusiveA || isInclusiveB;
+    }
 
     public boolean in(AngleRange other)
     {
-        return other.in(this.start) && other.in(this.end);
+        float thisStartRad = this.start.getRadians();
+        float thisEndRad = this.end.getRadians();
+        float otherStartRad = other.start.getRadians();
+        float otherEndRad = other.end.getRadians();
+
+        boolean startsInsideOther = isLessOrEqual(otherStartRad, thisStartRad, other.isInclusiveStart, this.isInclusiveStart);
+        boolean endsInsideOther = isLessOrEqual(thisEndRad, otherEndRad, this.isInclusiveEnd, other.isInclusiveEnd);
+
+        return startsInsideOther && endsInsideOther;
     }
 
-    public boolean in(Angle angle)
+    public boolean contains(Angle angle)
     {
         float angleRad = angle.getRadians();
         float startRad = start.getRadians();
@@ -111,14 +142,14 @@ public class AngleRange implements Comparable<AngleRange>
         }
     }
 
-    public boolean in(float radians)
+    public boolean contains(float radians)
     {
-        return this.in(Angle.fromRadians(radians));
+        return this.contains(Angle.fromRadians(radians));
     }
 
-    public boolean in(int degrees)
+    public boolean contains(int degrees)
     {
-        return this.in(Angle.fromDegrees(degrees));
+        return this.contains(Angle.fromDegrees(degrees));
     }
 
     // endregion
@@ -127,7 +158,9 @@ public class AngleRange implements Comparable<AngleRange>
 
     private boolean isBefore(float numA, float numB, boolean isInclusiveA, boolean isInclusiveB)
     {
-        return numA < numB || (numA == numB && !(isInclusiveA && isInclusiveB));
+        if (numA < numB) { return true; }
+        if (numA > numB) { return false; }
+        return !isInclusiveA || !isInclusiveB;
     }
 
     // endregion
@@ -173,11 +206,11 @@ public class AngleRange implements Comparable<AngleRange>
 
         if (thisEndRad < otherEndRad)
         {
-            newIsInclusiveEnd = this.isInclusiveEnd;
+            newIsInclusiveEnd = other.isInclusiveEnd;
         }
         else if (otherEndRad < thisEndRad)
         {
-            newIsInclusiveEnd = other.isInclusiveEnd;
+            newIsInclusiveEnd = this.isInclusiveEnd;
         }
         else
         {
@@ -207,9 +240,6 @@ public class AngleRange implements Comparable<AngleRange>
         float otherStartRad = other.start.getRadians();
         float otherEndRad = other.end.getRadians();
 
-        float newStartRad, newEndRad;
-        boolean newIsInclusiveStart, newIsInclusiveEnd;
-
         if (isBefore(thisEndRad, otherStartRad, this.isInclusiveEnd, other.isInclusiveStart) ||
                 isBefore(otherEndRad, thisStartRad, other.isInclusiveEnd, this.isInclusiveStart))
         {
@@ -217,20 +247,30 @@ public class AngleRange implements Comparable<AngleRange>
             return result;
         }
 
-        if (isBefore(otherStartRad, thisStartRad, other.isInclusiveStart, this.isInclusiveStart) &&
-                isBefore(otherEndRad, thisEndRad, other.isInclusiveEnd, this.isInclusiveEnd))
+        if ((otherStartRad < thisStartRad || (otherStartRad == thisStartRad && (other.isInclusiveStart || !this.isInclusiveStart))) &&
+                (otherEndRad > thisEndRad || (otherEndRad == thisEndRad && (other.isInclusiveEnd || !this.isInclusiveEnd))))
         {
             return result;
         }
 
-        if (thisStartRad < otherStartRad)
+        if (thisStartRad < otherStartRad || (thisStartRad == otherStartRad && this.isInclusiveStart && !other.isInclusiveStart))
         {
-            result.add(new AngleRange(this.start, other.start, this.isInclusiveStart, !other.isInclusiveStart));
+            result.add(new AngleRange(
+                    this.start,
+                    other.start,
+                    this.isInclusiveStart,
+                    !other.isInclusiveStart
+            ));
         }
 
-        if (otherEndRad < thisEndRad)
+        if (otherEndRad < thisEndRad || (otherEndRad == thisEndRad && !other.isInclusiveEnd && this.isInclusiveEnd))
         {
-            result.add(new AngleRange(otherEndRad, thisEndRad, !other.isInclusiveEnd, this.isInclusiveEnd));
+            result.add(new AngleRange(
+                    other.end,
+                    this.end,
+                    !other.isInclusiveEnd,
+                    this.isInclusiveEnd
+            ));
         }
 
         return result;
@@ -254,14 +294,7 @@ public class AngleRange implements Comparable<AngleRange>
     {
         float start = this.start.getRadians();
         float end = this.end.getRadians();
-        if (start >= end)
-        {
-            return start - end;
-        }
-        else
-        {
-            return end - start;
-        }
+        return Math.abs(end - start);
     }
 
     // endregion

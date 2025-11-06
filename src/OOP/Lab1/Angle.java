@@ -16,6 +16,7 @@ package OOP.Lab1;
 
 public class Angle implements Comparable<Angle>
 {
+    private static final float EPSILON = 1e-6f;
     private float radians;
 
     // region Constructors
@@ -70,7 +71,7 @@ public class Angle implements Comparable<Angle>
             return false;
         }
         Angle other = (Angle) obj;
-        return Math.abs(this.radians - other.radians) < 1e-6f;
+        return Math.abs(this.radians - other.radians) < EPSILON;
     }
 
     // endregion
@@ -145,7 +146,7 @@ public class Angle implements Comparable<Angle>
 
     public Angle divide(float divisor)
     {
-        if (Math.abs(divisor) < 1e-6f)
+        if (Math.abs(divisor) < EPSILON)
         {
             throw new ArithmeticException("Division by zero");
         }
@@ -155,7 +156,7 @@ public class Angle implements Comparable<Angle>
 
     public Angle divide(int divisor)
     {
-        if (Math.abs(divisor) < 1e-6f)
+        if (divisor == 0)
         {
             throw new ArithmeticException("Division by zero");
         }
@@ -196,14 +197,13 @@ public class Angle implements Comparable<Angle>
 
     private static float normalizeRadians(float radians)
     {
-        if (radians < Math.PI && radians >= 0)
-        {
-            return radians;
-        }
-
         float twoPI = (float) (Math.PI * 2);
-
-        return radians % twoPI;
+        radians = radians % twoPI;
+        if (radians < 0)
+        {
+            radians += twoPI;
+        }
+        return radians;
     }
 
     // endregion
