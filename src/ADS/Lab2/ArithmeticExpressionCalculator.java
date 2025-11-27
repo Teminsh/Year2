@@ -1,8 +1,7 @@
 package ADS.Lab2;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.Scanner;
+import java.util.Stack;
 
 /*
 Лаба №2 "Задача об арифметическом выражении"
@@ -20,207 +19,230 @@ import java.util.Scanner;
 
 public class ArithmeticExpressionCalculator
 {
-    static void main()
-    {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.print("Введите математическое выражение (завершите знаком =): ");
-        String input = scanner.nextLine();
-
-        if (input.isEmpty())
-        {
-            System.out.println("Строка не существует!");
-            scanner.close();
-            return;
-        }
-
-        if (!input.trim().endsWith("="))
-        {
-            System.out.println("Ошибка: выражение должно заканчиваться знаком '='!");
-            scanner.close();
-            return;
-        }
-
-        try
-        {
-            String expression = input.replaceAll("\\s", "").replaceAll("=$", "");
-            String postfix = infixToPostfix(expression);
-
-            double result = evaluatePostfix(postfix);
-
-            System.out.println("Результат: " + result);
-        }
-        catch (Exception e)
-        {
-            System.out.println("Ошибка вычисления: " + e.getMessage());
-        }
-
-        scanner.close();
-    }
-
     private static int getPrecedence(char operator)
     {
         return switch (operator)
         {
             case '+', '-' -> 1;
             case '*', '/' -> 2;
-            default -> 0;
+            default -> -1;
         };
     }
 
-    private static boolean isOperator(char c)
+    private static boolean isOperator(char ch)
     {
-        return c == '+' || c == '-' || c == '*' || c == '/';
+        return ch == '+' || ch == '-' || ch == '*' || ch == '/';
     }
 
-
-    private static String infixToPostfix(String infix) throws Exception
+    private static String preprocessExpression(String expression)
     {
-        StringBuilder output = new StringBuilder();
-        Deque<Character> operatorStack = new LinkedList<>();
+        StringBuilder result = new StringBuilder();
 
-        int i = 0;
-        while (i < infix.length())
+        for (int i = 0; i < expression.length(); i++)
         {
-            char c = infix.charAt(i);
+            char ch = expression.charAt(i);
 
-            if (Character.isDigit(c))
+            if (ch == '-')
             {
-                StringBuilder number = new StringBuilder();
-                while (i < infix.length() &&
-                        (Character.isDigit(infix.charAt(i)) || infix.charAt(i) == '.'))
+                if (i == 0 || expression.charAt(i - 1) == '(' || isOperator(expression.charAt(i - 1)))
                 {
-                    number.append(infix.charAt(i));
+                    result.append("(0-");
                     i++;
-                }
-                output.append(number).append(' ');
-                continue;
-            }
-
-            if (c == '(')
-            {
-                operatorStack.push(c);
-                i++;
-                continue;
-            }
-
-            if (c == ')')
-            {
-                while (!operatorStack.isEmpty() && operatorStack.peek() != '(')
-                {
-                    output.append(operatorStack.pop()).append(' ');
-                }
-
-                if (operatorStack.isEmpty())
-                {
-                    throw new Exception("Неверно расставлены скобки!");
-                }
-
-                operatorStack.pop();
-                i++;
-                continue;
-            }
-
-            if (isOperator(c))
-            {
-                if ((c == '-' || c == '+') &&
-                        (i == 0 || infix.charAt(i - 1) == '(' || isOperator(infix.charAt(i - 1))))
-                {
-                    if (c == '-')
+                    while (i < expression.length() &&
+                            (Character.isDigit(expression.charAt(i)) || expression.charAt(i) == '.'))
                     {
-                        output.append("0 ");
+                        result.append(expression.charAt(i));
+                        i++;
                     }
-                    i++;
-                    continue;
+                    result.append(')');
+                    i--;
                 }
-
-                while (!operatorStack.isEmpty() &&
-                        operatorStack.peek() != '(' &&
-                        getPrecedence(operatorStack.peek()) >= getPrecedence(c))
+                else
                 {
-                    output.append(operatorStack.pop()).append(' ');
+                    result.append(ch);
                 }
-
-                operatorStack.push(c);
-                i++;
-                continue;
             }
-
-            throw new Exception("Неожиданный символ: " + c);
+            else
+            {
+                result.append(ch);
+            }
         }
 
-        while (!operatorStack.isEmpty())
+        return result.toString();
+    }
+
+    private static String infixToPostfix(String expression) throws Exception
+    {
+        StringBuilder result = new StringBuilder();
+        Stack<Character> stack = new Stack<>();
+        int bracketBalance = 0;
+
+        for (int i = 0; i < expression.length(); i++)
         {
-            char op = operatorStack.pop();
+            char ch = expression.charAt(i);
+
+            if (ch == ' ')
+            {
+                continue;
+            }
+
+            if (Character.isDigit(ch) || ch == '.')
+            {
+                while (i < expression.length() &&
+                        (Character.isDigit(expression.charAt(i)) || expression.charAt(i) == '.'))
+                {
+                    result.append(expression.charAt(i));
+                    i++;
+                }
+                result.append(' ');
+                i--;
+            }
+            else if (ch == '(')
+            {
+                stack.push(ch);
+                bracketBalance++;
+            }
+            else if (ch == ')')
+            {
+                bracketBalance--;
+                if (bracketBalance < 0)
+                {
+                    throw new Exception("Ошибка: лишняя закрывающая скобка");
+                }
+                while (!stack.isEmpty() && stack.peek() != '(')
+                {
+                    result.append(stack.pop()).append(' ');
+                }
+                if (stack.isEmpty())
+                {
+                    throw new Exception("Ошибка: несбалансированные скобки");
+                }
+                stack.pop();
+            }
+            else if (isOperator(ch))
+            {
+                while (!stack.isEmpty() && getPrecedence(ch) <= getPrecedence(stack.peek()))
+                {
+                    result.append(stack.pop()).append(' ');
+                }
+                stack.push(ch);
+            }
+            else if (ch == '=')
+            {
+                break;
+            } else
+            {
+                throw new Exception("Ошибка: неизвестный символ '" + ch + "'");
+            }
+        }
+
+        if (bracketBalance != 0)
+        {
+            throw new Exception("Ошибка: несбалансированные скобки");
+        }
+
+        while (!stack.isEmpty())
+        {
+            char op = stack.pop();
             if (op == '(' || op == ')')
             {
-                throw new Exception("Неверно расставлены скобки!");
+                throw new Exception("Ошибка: несбалансированные скобки");
             }
-            output.append(op).append(' ');
+            result.append(op).append(' ');
         }
 
-        return output.toString().trim();
+        System.out.println(result.toString().trim());
+
+        return result.toString().trim();
     }
 
     private static double evaluatePostfix(String postfix) throws Exception
     {
-        Deque<Double> valueStack = new LinkedList<>();
-        String[] tokens = postfix.split(" ");
+        Stack<Double> stack = new Stack<>();
+        String[] tokens = postfix.split("\\s+");
 
         for (String token : tokens)
         {
-            if (token.isEmpty())
-            {
-                continue;
-            }
-
-            if (Character.isDigit(token.charAt(0)) || (token.length() > 1 && token.charAt(0) == '-'))
+            if (!isOperator(token.charAt(0)) || token.length() > 1)
             {
                 try
                 {
-                    valueStack.push(Double.parseDouble(token));
+                    stack.push(Double.parseDouble(token));
                 } catch (NumberFormatException e)
                 {
-                    throw new Exception("Некорректное число: " + token);
+                    throw new Exception("Ошибка: некорректное число '" + token + "'");
                 }
-                continue;
-            }
-
-            if (isOperator(token.charAt(0)))
+            } else if (isOperator(token.charAt(0)))
             {
-                if (valueStack.size() < 2)
+                if (stack.size() < 2)
                 {
-                    throw new Exception("Некорректное выражение!");
+                    throw new Exception("Ошибка: некорректное выражение");
                 }
 
-                double second = valueStack.pop();
-                double first = valueStack.pop();
-
+                double operand2 = stack.pop();
+                double operand1 = stack.pop();
                 double result = switch (token.charAt(0))
                 {
-                    case '+' -> first + second;
-                    case '-' -> first - second;
-                    case '*' -> first * second;
+                    case '+' -> operand1 + operand2;
+                    case '-' -> operand1 - operand2;
+                    case '*' -> operand1 * operand2;
                     case '/' ->
                     {
-                        if (Math.abs(second) < 1e-10)
+                        if (operand2 == 0)
                         {
-                            throw new Exception("Деление на ноль!");
+                            throw new Exception("Ошибка: деление на ноль");
                         }
-                        yield first / second;
+                        yield operand1 / operand2;
                     }
-                    default -> throw new Exception("Неизвестный оператор: " + token);
+                    default -> 0;
                 };
 
-                valueStack.push(result);
+                stack.push(result);
             }
         }
 
-        if (valueStack.size() != 1)
+        if (stack.size() != 1)
         {
-            throw new Exception("Некорректное выражение!");
+            throw new Exception("Ошибка: некорректное выражение");
         }
 
-        return valueStack.pop();
+        return stack.pop();
+    }
+
+    public static double calculate(String expression) throws Exception
+    {
+        if (expression == null || expression.isEmpty())
+        {
+            throw new Exception("Ошибка: пустое выражение");
+        }
+
+        if (!expression.trim().endsWith("="))
+        {
+            throw new Exception("Ошибка: выражение должно заканчиваться знаком '='");
+        }
+
+        expression = preprocessExpression(expression);
+
+        String postfix = infixToPostfix(expression);
+
+        return evaluatePostfix(postfix);
+    }
+
+    void main()
+    {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("Введите математическое выражение (окончание '='):");
+        String expression = scanner.nextLine();
+
+        try
+        {
+            double result = calculate(expression);
+            System.out.println("Результат: " + result);
+        } catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+        }
+        scanner.close();
     }
 }

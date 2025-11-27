@@ -5,7 +5,7 @@ import java.util.Arrays;
 public class Sorting
 {
 
-    // region 4Comb Sort
+    // region 4 Comb Sort
 
     public static void CombSort(int[] arr)
     {
@@ -36,7 +36,7 @@ public class Sorting
 
     //endregion
 
-    //region 5Insertion Sort
+    //region 5 Insertion Sort
 
     public static void InsertionSort(int[] arr)
     {
@@ -56,7 +56,7 @@ public class Sorting
 
     //endregion
 
-    //region 6Selection Sort
+    //region 6 Selection Sort
 
     public static void SelectionSort(int[] arr)
     {
@@ -79,7 +79,7 @@ public class Sorting
 
     //endregion
 
-    //region 7Shell Sort
+    //region 7 Shell Sort
 
     public static void ShellSort(int[] arr)
     {
@@ -103,7 +103,7 @@ public class Sorting
 
     //endregion
 
-    //region 8Radix Sort
+    //region 8 Radix Sort
 
     public static void RadixSort(int[] arr)
     {
@@ -145,7 +145,7 @@ public class Sorting
 
     //endregion
 
-    // region 9Heap Sort
+    // region 9 Heap Sort
 
     public static void HeapSort(int[] arr)
     {
@@ -195,7 +195,7 @@ public class Sorting
 
     // endregion
 
-    // region 10Merge Sort
+    // region 10 Merge Sort
 
     public static void MergeSort(int[] arr)
     {
@@ -269,7 +269,7 @@ public class Sorting
 
     // endregion
 
-    // region 11Quick Sort
+    // region 11 Quick Sort
 
     public static void QuickSort(int[] arr)
     {
@@ -316,6 +316,5 @@ public class Sorting
     }
 
     // endregion
-
 
 }
