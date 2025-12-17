@@ -1,4 +1,4 @@
-package ADS.Lab4_12;
+package ADS.Lab4_11;
 
 import java.util.Arrays;
 
@@ -7,7 +7,7 @@ public class Main
     static void main()
     {
         int[] array = {5, 17, 89, 150, 360, 450, 720, 1023, 0, 1, 2};
-        Sorting.QuickSort(array);
+        Sorting.InsertionSort(array);
         System.out.println(Arrays.toString(array));
     }
 }

@@ -1,10 +1,9 @@
-package ADS.Lab4_12;
+package ADS.Lab4_11;
 
 import java.util.Arrays;
 
 public class Sorting
 {
-
     // region 4 Comb Sort
 
     public static void CombSort(int[] arr)
