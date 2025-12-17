@@ -19,7 +19,7 @@ public class ExternalSortClass
         {
             ExternalSort(inputFile, outputFile);
 
-            if (isSorted(inputFile))
+            if (isSorted(outputFile))
             {
                 System.out.println("Файл отсортирован");
             } else
