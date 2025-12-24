@@ -34,9 +34,173 @@ public class ExternalSortClass
     }
 
 
-    private static void ExternalSort(String inputFile, String outputFile)
+    private static void ExternalSort(String inputFile, String outputFile) throws IOException
     {
+        int numRuns = createInitialRuns(inputFile);
 
+        if (numRuns == 0)
+        {
+            new File(outputFile).createNewFile();
+            return;
+        }
+
+        if (numRuns == 1)
+        {
+            copyFile("temp_run_0.txt", outputFile);
+            new File("temp_run_0.txt").delete();
+            return;
+        }
+
+        mergeRuns(numRuns, outputFile);
+    }
+
+    private static int createInitialRuns(String inputFile) throws IOException
+    {
+        BufferedReader reader = new BufferedReader(new FileReader(inputFile));
+        int runIndex = 0;
+        int[] buffer = new int[BLOCK_SIZE];
+
+        while (true)
+        {
+            int count = 0;
+            String line;
+
+            while (count < BLOCK_SIZE && (line = reader.readLine()) != null)
+            {
+                buffer[count++] = Integer.parseInt(line);
+            }
+
+            if (count == 0)
+            {
+                break;
+            }
+
+            java.util.Arrays.sort(buffer, 0, count);
+
+            BufferedWriter writer = new BufferedWriter(
+                    new FileWriter("temp_run_" + runIndex + ".txt"));
+            for (int i = 0; i < count; i++)
+            {
+                writer.write(String.valueOf(buffer[i]));
+                writer.newLine();
+            }
+            writer.close();
+            runIndex++;
+        }
+
+        reader.close();
+        return runIndex;
+    }
+
+    private static void mergeRuns(int numRuns, String outputFile) throws IOException
+    {
+        int currentPass = 0;
+        int runsInCurrentPass = numRuns;
+
+        while (runsInCurrentPass > 1)
+        {
+            int nextRunIndex = 0;
+
+            for (int i = 0; i < runsInCurrentPass; i += 2)
+            {
+                String file1 = (currentPass == 0)
+                        ? "temp_run_" + i + ".txt"
+                        : "temp_pass_" + currentPass + "_run_" + i + ".txt";
+
+                if (i + 1 < runsInCurrentPass)
+                {
+                    String file2 = (currentPass == 0)
+                            ? "temp_run_" + (i + 1) + ".txt"
+                            : "temp_pass_" + currentPass + "_run_" + (i + 1) + ".txt";
+                    String outFile = "temp_pass_" + (currentPass + 1) + "_run_"
+                            + nextRunIndex + ".txt";
+
+                    mergeTwoFiles(file1, file2, outFile);
+
+                    new File(file1).delete();
+                    new File(file2).delete();
+                }
+                else
+                {
+                    String outFile = "temp_pass_" + (currentPass + 1) + "_run_"
+                            + nextRunIndex + ".txt";
+                    copyFile(file1, outFile);
+                    new File(file1).delete();
+                }
+                nextRunIndex++;
+            }
+
+            runsInCurrentPass = nextRunIndex;
+            currentPass++;
+        }
+
+        String lastFile = "temp_pass_" + currentPass + "_run_0.txt";
+        copyFile(lastFile, outputFile);
+        new File(lastFile).delete();
+    }
+
+    private static void mergeTwoFiles(String file1, String file2, String outputFile)
+            throws IOException
+    {
+        BufferedReader reader1 = new BufferedReader(new FileReader(file1));
+        BufferedReader reader2 = new BufferedReader(new FileReader(file2));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+
+        String line1 = reader1.readLine();
+        String line2 = reader2.readLine();
+
+        while (line1 != null && line2 != null)
+        {
+            int val1 = Integer.parseInt(line1);
+            int val2 = Integer.parseInt(line2);
+
+            if (val1 <= val2)
+            {
+                writer.write(String.valueOf(val1));
+                writer.newLine();
+                line1 = reader1.readLine();
+            }
+            else
+            {
+                writer.write(String.valueOf(val2));
+                writer.newLine();
+                line2 = reader2.readLine();
+            }
+        }
+
+        while (line1 != null)
+        {
+            writer.write(line1);
+            writer.newLine();
+            line1 = reader1.readLine();
+        }
+
+        while (line2 != null)
+        {
+            writer.write(line2);
+            writer.newLine();
+            line2 = reader2.readLine();
+        }
+
+        reader1.close();
+        reader2.close();
+        writer.close();
+    }
+
+    private static void copyFile(String source, String dest) throws IOException
+    {
+        BufferedReader reader = new BufferedReader(new FileReader(source));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(dest));
+
+        String line;
+        while ((line = reader.readLine()) != null)
+        {
+            writer.write(line);
+            writer.newLine();
+        }
+
+        reader.close();
+        writer.close();
     }
 
     private static boolean isSorted(String fileName) throws IOException
