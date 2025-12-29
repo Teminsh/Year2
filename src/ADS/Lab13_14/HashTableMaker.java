@@ -1,11 +1,11 @@
-package ADS;
+package ADS.Lab13_14;
 
 import java.io.*;
-import java.util.*;
 
-public class Lab13_14
+public class HashTableMaker
 {
-    // ==================== ЛАБА №13: ОТКРЫТАЯ АДРЕСАЦИЯ ====================
+    // region Лаба №13: Открытая адресация (Open Addressing)
+
     static class HashTableOpenAddressing
     {
         private static final int TABLE_SIZE = 101;
@@ -15,12 +15,18 @@ public class Lab13_14
         private Integer[] values;
         private int size;
 
+        // region Конструктор
+
         public HashTableOpenAddressing()
         {
             keys = new String[TABLE_SIZE];
             values = new Integer[TABLE_SIZE];
             size = 0;
         }
+
+        // endregion
+
+        // region Хеш-функция
 
         private int hash(String key)
         {
@@ -36,6 +42,10 @@ public class Lab13_14
             }
             return hashVal;
         }
+
+        // endregion
+
+        // region Вставка элемента
 
         public void put(String key, int value)
         {
@@ -66,6 +76,10 @@ public class Lab13_14
             }
         }
 
+        // endregion
+
+        // region Получение элемента
+
         public Integer get(String key)
         {
             int index = hash(key);
@@ -86,6 +100,10 @@ public class Lab13_14
             }
             return null;
         }
+
+        // endregion
+
+        // region Сохранение в файл
 
         public void saveToFile(String fileName) throws IOException
         {
@@ -112,12 +130,19 @@ public class Lab13_14
                 writer.write("╚════════╩══════════════════╩═══════════╝\n");
             }
         }
+
+        // endregion
     }
 
-    // ==================== ЛАБА №14: МЕТОД ЦЕПОЧЕК ====================
+    // endregion
+
+    // region Лаба №14: Метод цепочек (Chaining Method)
+
     static class HashTableChaining
     {
         private static final int TABLE_SIZE = 101;
+
+        // region Node класс
 
         static class Node
         {
@@ -133,14 +158,22 @@ public class Lab13_14
             }
         }
 
+        // endregion
+
         private Node[] table;
         private int size;
+
+        // region Конструктор
 
         public HashTableChaining()
         {
             table = new Node[TABLE_SIZE];
             size = 0;
         }
+
+        // endregion
+
+        // region Хеш-функция
 
         private int hash(String key)
         {
@@ -156,6 +189,10 @@ public class Lab13_14
             }
             return hashVal;
         }
+
+        // endregion
+
+        // region Вставка элемента
 
         public void put(String key, int value)
         {
@@ -178,6 +215,10 @@ public class Lab13_14
             size++;
         }
 
+        // endregion
+
+        // region Получение элемента
+
         public Integer get(String key)
         {
             int index = hash(key);
@@ -193,6 +234,10 @@ public class Lab13_14
             }
             return null;
         }
+
+        // endregion
+
+        // region Сохранение в файл
 
         public void saveToFile(String fileName) throws IOException
         {
@@ -250,45 +295,16 @@ public class Lab13_14
                 writer.write(String.format("Максимальная длина цепочки: %d\n", maxChainLength));
             }
         }
+
+        // endregion
     }
 
-    // ==================== ГЛАВНЫЙ МЕТОД ====================
-    static void main()
-    {
-        String inputFile = "input_text.txt";
-        String outputFile13 = "lab13_open_addressing.txt";
-        String outputFile14 = "lab14_chaining.txt";
+    // endregion
 
-        // Создаем тестовый файл, если его нет
-        createTestFile(inputFile);
+    // region Вспомогательные методы
 
-        try
-        {
-            // ЛАБА №13: Открытая адресация
-            System.out.println("=== Запуск Лабы №13 (Открытая адресация) ===");
-            HashTableOpenAddressing hashTable13 = new HashTableOpenAddressing();
-            processFile(inputFile, hashTable13);
-            hashTable13.saveToFile(outputFile13);
-            System.out.println("✓ Результат сохранен в " + outputFile13 + "\n");
+    // region Обработка файла
 
-            // ЛАБА №14: Метод цепочек
-            System.out.println("=== Запуск Лабы №14 (Метод цепочек) ===");
-            HashTableChaining hashTable14 = new HashTableChaining();
-            processFile(inputFile, hashTable14);
-            hashTable14.saveToFile(outputFile14);
-            System.out.println("✓ Результат сохранен в " + outputFile14 + "\n");
-
-            System.out.println("Обе лабораторные выполнены успешно!");
-
-        }
-        catch (IOException e)
-        {
-            System.err.println("Ошибка: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    // Чтение файла и заполнение хеш-таблицы (для обоих типов)
     private static void processFile(String inputFile, Object hashTable) throws IOException
     {
         BufferedReader reader = new BufferedReader(new FileReader(inputFile));
@@ -296,7 +312,6 @@ public class Lab13_14
 
         while ((line = reader.readLine()) != null)
         {
-            // Разбиваем на слова, удаляем знаки препинания
             String[] words = line.toLowerCase()
                     .replaceAll("[^а-яёa-z\\s]", " ")
                     .split("\\s+");
@@ -319,13 +334,16 @@ public class Lab13_14
         reader.close();
     }
 
-    // Создание тестового файла с текстом
+    // endregion
+
+    // region Создание тестового файла
+
     private static void createTestFile(String fileName)
     {
         File file = new File(fileName);
         if (file.exists())
         {
-            return; // Файл уже существует
+            return;
         }
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName)))
@@ -345,6 +363,39 @@ public class Lab13_14
         catch (IOException e)
         {
             System.err.println("Не удалось создать тестовый файл");
+        }
+    }
+
+    // endregion
+
+    // endregion
+
+    static void main()
+    {
+        String inputFile = "input_text.txt";
+        String outputFile13 = "lab13_open_addressing.txt";
+        String outputFile14 = "lab14_chaining.txt";
+
+        createTestFile(inputFile);
+
+        try
+        {
+            System.out.println("=== Запуск Лабы №13 (Открытая адресация) ===");
+            HashTableOpenAddressing hashTable13 = new HashTableOpenAddressing();
+            processFile(inputFile, hashTable13);
+            hashTable13.saveToFile(outputFile13);
+            System.out.println("✓ Результат сохранен в " + outputFile13 + "\n");
+
+            System.out.println("=== Запуск Лабы №14 (Метод цепочек) ===");
+            HashTableChaining hashTable14 = new HashTableChaining();
+            processFile(inputFile, hashTable14);
+            hashTable14.saveToFile(outputFile14);
+            System.out.println("✓ Результат сохранен в " + outputFile14 + "\n");
+        }
+        catch (IOException e)
+        {
+            System.err.println("Ошибка: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 }
