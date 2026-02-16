@@ -1,6 +1,6 @@
 package OOP.Lab2;
 
-
+//region Task
 /*
 Лабораторная работа 2 (красивая консоль)
 
@@ -31,7 +31,66 @@ with Printer(color: Color, position : Tuple[int, int], symbol: str) as printer:
 1. работу класса как статическим образом, так и с использованием создания экземпляра класса, используя with (using и.т.п.).
 2. независимость работы класса от поданного файла с шаблонами букв, реализовав шрифты высотой 5 и 7 символов
  */
+//endregion
 
 public class Main
 {
+    public static void main(String[] args)
+    {
+        try
+        {
+            System.out.print(AnsiCodes.CLEAR_SCREEN);
+            System.out.print(AnsiCodes.CURSOR_HOME);
+
+            System.out.println("=== Demo ===\n");
+
+            System.out.println("1. Static simple text:");
+            Printer.print("Hello", Color.BRIGHT_GREEN, new int[]{5, 10}, "*");
+
+            System.out.print(AnsiCodes.moveCursor(9, 1));
+            System.out.println("\nPress Enter...");
+            System.in.read();
+
+            System.out.print(AnsiCodes.CLEAR_SCREEN);
+            System.out.print(AnsiCodes.CURSOR_HOME);
+            System.out.println("2. Font 5:");
+
+            Printer.loadFont("font5.txt");
+            Printer.print("HELLO", Color.BRIGHT_RED, new int[]{3, 5}, "~");
+            Printer.print("WORLD", Color.BRIGHT_CYAN, new int[]{9, 5}, "*");
+
+            System.out.print(AnsiCodes.moveCursor(16, 1));
+            System.out.println("\nPress Enter...");
+            System.in.read();
+
+            System.out.print(AnsiCodes.CLEAR_SCREEN);
+            System.out.print(AnsiCodes.CURSOR_HOME);
+            System.out.println("3. Font 7:");
+
+            Printer.loadFont("font7.txt");
+            Printer.print("HELLO", Color.BRIGHT_YELLOW, new int[]{3, 5}, "@");
+
+            System.out.print(AnsiCodes.moveCursor(12, 1));
+            System.out.println("\nPress Enter...");
+            System.in.read();
+
+            System.out.print(AnsiCodes.CLEAR_SCREEN);
+            System.out.print(AnsiCodes.CURSOR_HOME);
+            System.out.println("4. Try-with-resources:");
+
+            Printer.loadFont("font5.txt");
+            try (Printer printer = new Printer(Color.BRIGHT_GREEN, new int[]{3, 10}, "*"))
+            {
+                printer.print("JAVA");
+                printer.print("CODE");
+            }
+
+            System.out.print(AnsiCodes.moveCursor(20, 1));
+            System.out.println("\nDone!");
+
+        } catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
 }

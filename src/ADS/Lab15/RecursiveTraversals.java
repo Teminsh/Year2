@@ -215,7 +215,5 @@ public class RecursiveTraversals
         System.out.println("\nПрямой обход (Pre-order):    " + tree.preorder());
         System.out.println("Центральный обход (In-order): " + tree.inorder());
         System.out.println("Концевой обход (Post-order):  " + tree.postorder());
-
-        System.out.println("\nОжидаемая последовательность: 1 2 4 7 8 3 5 9 11 6 10");
     }
 }

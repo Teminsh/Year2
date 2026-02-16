@@ -1,0 +1,6 @@
+[INFO] [2026.02.12 12:11:11] System initialization started.
+[ERROR] [2026.02.12 12:11:11] System critical failure!
+[INFO] [2026.02.12 12:12:40] System initialization started.
+[ERROR] [2026.02.12 12:12:40] System critical failure!
+[INFO] [2026.02.12 12:14:58] System initialization started.
+[ERROR] [2026.02.12 12:14:58] System critical failure!
