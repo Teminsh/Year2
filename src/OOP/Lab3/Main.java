@@ -56,9 +56,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class Main {
-    //region Main Execution
-    public static void main(String[] args) {
+public class Main
+{
+    public static void main(String[] args)
+    {
+        testBasics();
+        testRegexFilter();
+        testSyslogAndFtpHandlers();
+
+        System.out.println("\n=== Done ===");
+    }
+
+    private static void testBasics()
+    {
         List<ILogFilter> filters = new ArrayList<>();
         filters.add(new LevelFilter(LogLevel.INFO));
         filters.add(new SimpleLogFilter("System"));
@@ -73,20 +83,15 @@ public class Main {
 
         Logger logger = new Logger(filters, formatters, handlers);
 
-        System.out.println("=== Testing Logger ===\n");
+        System.out.println("=== Testing Logger (basic) ===\n");
 
         logger.logInfo("System initialization started.");
         logger.logWarn("User uploaded a file.");
         logger.logError("System critical failure!");
-
-        testRegexFilter();
-
-        System.out.println("\n=== Done ===");
     }
-    //endregion
 
-    //region Test Helpers
-    private static void testRegexFilter() {
+    private static void testRegexFilter()
+    {
         System.out.println("\n--- Testing Regex Filter (Numbers only) ---");
 
         List<ILogFilter> filters = new ArrayList<>();
@@ -100,6 +105,24 @@ public class Main {
         digitLogger.logInfo("No digits here");
         digitLogger.logInfo("Error code 404");
     }
-    //endregion
-}
 
+    private static void testSyslogAndFtpHandlers()
+    {
+        System.out.println("\n--- Testing Syslog & FTP Handlers ---");
+
+        List<ILogFilter> filters = new ArrayList<>();
+        filters.add(new LevelFilter(LogLevel.WARN));
+
+        List<ILogFormatter> formatters = Arrays.asList(new StandardFormatter());
+
+        List<ILogHandler> handlers = new ArrayList<>();
+        handlers.add(new SyslogHandler("MyApp"));
+        handlers.add(new FtpHandler("logs.example.com", "logger"));
+
+        Logger networkLogger = new Logger(filters, formatters, handlers);
+
+        networkLogger.logInfo("System info message");
+        networkLogger.logWarn("System warning: disk space low");
+        networkLogger.logError("System error: database down");
+    }
+}

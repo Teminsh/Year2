@@ -1,13 +1,16 @@
 package OOP.Lab3;
 
-interface ILogFilter {
+interface ILogFilter
+{
     boolean match(LogLevel level, String message);
 }
 
-interface ILogFormatter {
+interface ILogFormatter
+{
     String format(LogLevel level, String message);
 }
 
-interface ILogHandler {
+interface ILogHandler
+{
     void handle(LogLevel level, String message);
 }

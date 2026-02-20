@@ -45,11 +45,9 @@ public class Main
             System.out.println("=== Demo ===\n");
 
             System.out.println("1. Static simple text:");
-            Printer.print("Hello", Color.BRIGHT_GREEN, new int[]{5, 10}, "*");
+            Printer.print("Hello\n", Color.BRIGHT_GREEN, new int[]{5, 10});
 
             System.out.print(AnsiCodes.moveCursor(9, 1));
-            System.out.println("\nPress Enter...");
-            System.in.read();
 
             System.out.print(AnsiCodes.CLEAR_SCREEN);
             System.out.print(AnsiCodes.CURSOR_HOME);
@@ -57,11 +55,9 @@ public class Main
 
             Printer.loadFont("font5.txt");
             Printer.print("HELLO", Color.BRIGHT_RED, new int[]{3, 5}, "~");
-            Printer.print("WORLD", Color.BRIGHT_CYAN, new int[]{9, 5}, "*");
+            Printer.print("WORLD", Color.BRIGHT_CYAN, new int[]{9, 5});
 
             System.out.print(AnsiCodes.moveCursor(16, 1));
-            System.out.println("\nPress Enter...");
-            System.in.read();
 
             System.out.print(AnsiCodes.CLEAR_SCREEN);
             System.out.print(AnsiCodes.CURSOR_HOME);
@@ -71,8 +67,6 @@ public class Main
             Printer.print("HELLO", Color.BRIGHT_YELLOW, new int[]{3, 5}, "@");
 
             System.out.print(AnsiCodes.moveCursor(12, 1));
-            System.out.println("\nPress Enter...");
-            System.in.read();
 
             System.out.print(AnsiCodes.CLEAR_SCREEN);
             System.out.print(AnsiCodes.CURSOR_HOME);
@@ -81,12 +75,23 @@ public class Main
             Printer.loadFont("font5.txt");
             try (Printer printer = new Printer(Color.BRIGHT_GREEN, new int[]{3, 10}, "*"))
             {
-                printer.print("JAVA");
+                printer.print("JAVA IS THE BEST");
                 printer.print("CODE");
             }
 
             System.out.print(AnsiCodes.moveCursor(20, 1));
-            System.out.println("\nDone!");
+
+            System.out.print(AnsiCodes.CLEAR_SCREEN);
+            System.out.print(AnsiCodes.CURSOR_HOME);
+            System.out.println("5. Positioning Demo:");
+
+            Printer.loadFont("font5.txt");
+
+            Printer.print("A", Color.RED, new int[]{3, 5}, "*");
+            Printer.print("B", Color.GREEN, new int[]{9, 10}, "*");
+            Printer.print("C", Color.BLUE, new int[]{15, 15}, "*");
+
+            System.out.print(AnsiCodes.moveCursor(22, 1));
 
         } catch (Exception e)
         {

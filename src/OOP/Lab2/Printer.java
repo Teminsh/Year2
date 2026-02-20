@@ -27,6 +27,9 @@ public class Printer implements AutoCloseable {
         Path path = Paths.get(fontFile);
 
         if (!Files.exists(path)) {
+            System.out.print(Color.YELLOW.getCode());
+            System.out.println("[WARN] Файл шрифта '" + fontFile + "' не найден.");
+            System.out.print(Color.RESET.getCode());
             createDefaultFontFile(path, fontFile);
         }
 
@@ -37,71 +40,473 @@ public class Printer implements AutoCloseable {
             throw new IOException("Font file is empty");
         }
 
-        if (fontFile.toLowerCase().endsWith(".json")) {
-            loadJsonFont(lines);
-        } else {
-            loadTextFont(lines);
-        }
+        loadTextFont(lines);
     }
 
     private static void createDefaultFontFile(Path path, String filename) throws IOException {
         String content = "";
         if (filename.equals("font5.txt")) {
+            System.out.print(Color.YELLOW.getCode());
+            System.out.println("[INFO] Восстанавливаю стандартный шрифт высотой 5...");
             content = getFont5Content();
         } else if (filename.equals("font7.txt")) {
+            System.out.print(Color.YELLOW.getCode());
+            System.out.println("[INFO] Восстанавливаю стандартный шрифт высотой 7...");
             content = getFont7Content();
         } else {
+            System.out.print(Color.RED.getCode());
+            System.out.println("[ERROR] Шрифт '" + filename + "' неизвестен системе!");
+            System.out.println("[WARN] Создаю пустой файл шаблона. Пожалуйста, заполните его вручную.");
+
             Files.createFile(path);
+            System.out.print(Color.RESET.getCode());
             return;
         }
+
+        System.out.print(Color.RESET.getCode());
         Files.write(path, content.getBytes());
     }
     //endregion
 
     //region Default files
     private static String getFont5Content() {
-        return "CHAR:A\n  *  \n * * \n*****\n*   *\n*   *\n\n" +
-                "CHAR:B\n**** \n*   *\n**** \n*   *\n**** \n\n" +
-                "CHAR:C\n ****\n*    \n*    \n*    \n ****\n\n" +
-                "CHAR:D\n**** \n*   *\n*   *\n*   *\n**** \n\n" +
-                "CHAR:E\n*****\n*    \n**** \n*    \n*****\n\n" +
-                "CHAR:F\n*****\n*    \n**** \n*    \n*    \n\n" +
-                "CHAR:G\n ****\n*    \n*  **\n*   *\n ****\n\n" +
-                "CHAR:H\n*   *\n*   *\n*****\n*   *\n*   *\n\n" +
-                "CHAR:I\n*****\n  *  \n  *  \n  *  \n*****\n\n" +
-                "CHAR:J\n  ***\n    *\n    *\n*   *\n *** \n\n" +
-                "CHAR:K\n*   *\n*  * \n***  \n*  * \n*   *\n\n" +
-                "CHAR:L\n*    \n*    \n*    \n*    \n*****\n\n" +
-                "CHAR:M\n*   *\n** **\n* * *\n*   *\n*   *\n\n" +
-                "CHAR:N\n*   *\n**  *\n* * *\n*  **\n*   *\n\n" +
-                "CHAR:O\n *** \n*   *\n*   *\n*   *\n *** \n\n" +
-                "CHAR:P\n**** \n*   *\n**** \n*    \n*    \n\n" +
-                "CHAR:Q\n *** \n*   *\n*   *\n*  * \n ** *\n\n" +
-                "CHAR:R\n**** \n*   *\n**** \n*  * \n*   *\n\n" +
-                "CHAR:S\n ****\n*    \n *** \n    *\n**** \n\n" +
-                "CHAR:T\n*****\n  *  \n  *  \n  *  \n  *  \n\n" +
-                "CHAR:U\n*   *\n*   *\n*   *\n*   *\n *** \n\n" +
-                "CHAR:V\n*   *\n*   *\n*   *\n * * \n  *  \n\n" +
-                "CHAR:W\n*   *\n*   *\n* * *\n** **\n*   *\n\n" +
-                "CHAR:X\n*   *\n * * \n  *  \n * * \n*   *\n\n" +
-                "CHAR:Y\n*   *\n * * \n  *  \n  *  \n  *  \n\n" +
-                "CHAR:Z\n*****\n   * \n  *  \n *   \n*****\n\n" +
-                "CHAR: \n     \n     \n     \n     \n     \n";
+        return "CHAR:A\n"
+                + "  *  \n"
+                + " * * \n"
+                + "*****\n"
+                + "*   *\n"
+                + "*   *\n"
+                + "\n"
+                + "CHAR:B\n"
+                + "**** \n"
+                + "*   *\n"
+                + "**** \n"
+                + "*   *\n"
+                + "**** \n"
+                + "\n"
+                + "CHAR:C\n"
+                + " ****\n"
+                + "*    \n"
+                + "*    \n"
+                + "*    \n"
+                + " ****\n"
+                + "\n"
+                + "CHAR:D\n"
+                + "**** \n"
+                + "*   *\n"
+                + "*   *\n"
+                + "*   *\n"
+                + "**** \n"
+                + "\n"
+                + "CHAR:E\n"
+                + "*****\n"
+                + "*    \n"
+                + "**** \n"
+                + "*    \n"
+                + "*****\n"
+                + "\n"
+                + "CHAR:F\n"
+                + "*****\n"
+                + "*    \n"
+                + "**** \n"
+                + "*    \n"
+                + "*    \n"
+                + "\n"
+                + "CHAR:G\n"
+                + " ****\n"
+                + "*    \n"
+                + "*  **\n"
+                + "*   *\n"
+                + " ****\n"
+                + "\n"
+                + "CHAR:H\n"
+                + "*   *\n"
+                + "*   *\n"
+                + "*****\n"
+                + "*   *\n"
+                + "*   *\n"
+                + "\n"
+                + "CHAR:I\n"
+                + "*****\n"
+                + "  *  \n"
+                + "  *  \n"
+                + "  *  \n"
+                + "*****\n"
+                + "\n"
+                + "CHAR:J\n"
+                + "  ***\n"
+                + "    *\n"
+                + "    *\n"
+                + "*   *\n"
+                + " *** \n"
+                + "\n"
+                + "CHAR:K\n"
+                + "*   *\n"
+                + "*  * \n"
+                + "***  \n"
+                + "*  * \n"
+                + "*   *\n"
+                + "\n"
+                + "CHAR:L\n"
+                + "*    \n"
+                + "*    \n"
+                + "*    \n"
+                + "*    \n"
+                + "*****\n"
+                + "\n"
+                + "CHAR:M\n"
+                + "*   *\n"
+                + "** **\n"
+                + "* * *\n"
+                + "*   *\n"
+                + "*   *\n"
+                + "\n"
+                + "CHAR:N\n"
+                + "*   *\n"
+                + "**  *\n"
+                + "* * *\n"
+                + "*  **\n"
+                + "*   *\n"
+                + "\n"
+                + "CHAR:O\n"
+                + " *** \n"
+                + "*   *\n"
+                + "*   *\n"
+                + "*   *\n"
+                + " *** \n"
+                + "\n"
+                + "CHAR:P\n"
+                + "**** \n"
+                + "*   *\n"
+                + "**** \n"
+                + "*    \n"
+                + "*    \n"
+                + "\n"
+                + "CHAR:Q\n"
+                + " *** \n"
+                + "*   *\n"
+                + "*   *\n"
+                + "*  * \n"
+                + " ** *\n"
+                + "\n"
+                + "CHAR:R\n"
+                + "**** \n"
+                + "*   *\n"
+                + "**** \n"
+                + "*  * \n"
+                + "*   *\n"
+                + "\n"
+                + "CHAR:S\n"
+                + " ****\n"
+                + "*    \n"
+                + " *** \n"
+                + "    *\n"
+                + "**** \n"
+                + "\n"
+                + "CHAR:T\n"
+                + "*****\n"
+                + "  *  \n"
+                + "  *  \n"
+                + "  *  \n"
+                + "  *  \n"
+                + "\n"
+                + "CHAR:U\n"
+                + "*   *\n"
+                + "*   *\n"
+                + "*   *\n"
+                + "*   *\n"
+                + " *** \n"
+                + "\n"
+                + "CHAR:V\n"
+                + "*   *\n"
+                + "*   *\n"
+                + "*   *\n"
+                + " * * \n"
+                + "  *  \n"
+                + "\n"
+                + "CHAR:W\n"
+                + "*   *\n"
+                + "*   *\n"
+                + "* * *\n"
+                + "** **\n"
+                + "*   *\n"
+                + "\n"
+                + "CHAR:X\n"
+                + "*   *\n"
+                + " * * \n"
+                + "  *  \n"
+                + " * * \n"
+                + "*   *\n"
+                + "\n"
+                + "CHAR:Y\n"
+                + "*   *\n"
+                + " * * \n"
+                + "  *  \n"
+                + "  *  \n"
+                + "  *  \n"
+                + "\n"
+                + "CHAR:Z\n"
+                + "*****\n"
+                + "   * \n"
+                + "  *  \n"
+                + " *   \n"
+                + "*****\n"
+                + "\n"
+                + "CHAR: \n"
+                + "     \n"
+                + "     \n"
+                + "     \n"
+                + "     \n"
+                + "     \n";
     }
 
+
     private static String getFont7Content() {
-        return "CHAR:A\n   *   \n  * *  \n *   * \n *   * \n ***** \n *   * \n *   * \n\n" +
-                "CHAR:B\n ****  \n *   * \n *   * \n ****  \n *   * \n *   * \n ****  \n\n" +
-                "CHAR:C\n  **** \n *     \n *     \n *     \n *     \n *     \n  **** \n\n" +
-                "CHAR:D\n ****  \n *   * \n *   * \n *   * \n *   * \n *   * \n ****  \n\n" +
-                "CHAR:E\n ***** \n *     \n *     \n ****  \n *     \n *     \n ***** \n\n" +
-                "CHAR:H\n *   * \n *   * \n *   * \n ***** \n *   * \n *   * \n *   * \n\n" +
-                "CHAR:I\n ***** \n   *   \n   *   \n   *   \n   *   \n   *   \n ***** \n\n" +
-                "CHAR:L\n *     \n *     \n *     \n *     \n *     \n *     \n ***** \n\n" +
-                "CHAR:O\n  ***  \n *   * \n *   * \n *   * \n *   * \n *   * \n  ***  \n\n" +
-                "CHAR:W\n *   * \n *   * \n *   * \n * * * \n * * * \n ** ** \n *   * \n\n" +
-                "CHAR: \n       \n       \n       \n       \n       \n       \n       \n";
+        return ""
+                + "CHAR:A\n"
+                + "   *   \n"
+                + "  * *  \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " ***** \n"
+                + " *   * \n"
+                + " *   * \n"
+                + "\n"
+                + "CHAR:B\n"
+                + " ****  \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " ****  \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " ****  \n"
+                + "\n"
+                + "CHAR:C\n"
+                + "  **** \n"
+                + " *     \n"
+                + " *     \n"
+                + " *     \n"
+                + " *     \n"
+                + " *     \n"
+                + "  **** \n"
+                + "\n"
+                + "CHAR:D\n"
+                + " ****  \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " ****  \n"
+                + "\n"
+                + "CHAR:E\n"
+                + " ***** \n"
+                + " *     \n"
+                + " *     \n"
+                + " ****  \n"
+                + " *     \n"
+                + " *     \n"
+                + " ***** \n"
+                + "\n"
+                + "CHAR:F\n"
+                + " ***** \n"
+                + " *     \n"
+                + " *     \n"
+                + " ****  \n"
+                + " *     \n"
+                + " *     \n"
+                + " *     \n"
+                + "\n"
+                + "CHAR:G\n"
+                + "  **** \n"
+                + " *     \n"
+                + " *     \n"
+                + " *  ** \n"
+                + " *   * \n"
+                + " *   * \n"
+                + "  ***  \n"
+                + "\n"
+                + "CHAR:H\n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " ***** \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + "\n"
+                + "CHAR:I\n"
+                + " ***** \n"
+                + "   *   \n"
+                + "   *   \n"
+                + "   *   \n"
+                + "   *   \n"
+                + "   *   \n"
+                + " ***** \n"
+                + "\n"
+                + "CHAR:J\n"
+                + "   *** \n"
+                + "    *  \n"
+                + "    *  \n"
+                + "    *  \n"
+                + "    *  \n"
+                + " *  *  \n"
+                + "  **   \n"
+                + "\n"
+                + "CHAR:K\n"
+                + " *   * \n"
+                + " *  *  \n"
+                + " * *   \n"
+                + " **    \n"
+                + " * *   \n"
+                + " *  *  \n"
+                + " *   * \n"
+                + "\n"
+                + "CHAR:L\n"
+                + " *     \n"
+                + " *     \n"
+                + " *     \n"
+                + " *     \n"
+                + " *     \n"
+                + " *     \n"
+                + " ***** \n"
+                + "\n"
+                + "CHAR:M\n"
+                + " *   * \n"
+                + " ** ** \n"
+                + " * * * \n"
+                + " * * * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + "\n"
+                + "CHAR:N\n"
+                + " *   * \n"
+                + " **  * \n"
+                + " **  * \n"
+                + " * * * \n"
+                + " *  ** \n"
+                + " *  ** \n"
+                + " *   * \n"
+                + "\n"
+                + "CHAR:O\n"
+                + "  ***  \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + "  ***  \n"
+                + "\n"
+                + "CHAR:P\n"
+                + " ****  \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " ****  \n"
+                + " *     \n"
+                + " *     \n"
+                + " *     \n"
+                + "\n"
+                + "CHAR:Q\n"
+                + "  ***  \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " * * * \n"
+                + " *  *  \n"
+                + "  ** * \n"
+                + "\n"
+                + "CHAR:R\n"
+                + " ****  \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " ****  \n"
+                + " * *   \n"
+                + " *  *  \n"
+                + " *   * \n"
+                + "\n"
+                + "CHAR:S\n"
+                + "  **** \n"
+                + " *     \n"
+                + " *     \n"
+                + "  ***  \n"
+                + "     * \n"
+                + "     * \n"
+                + " ****  \n"
+                + "\n"
+                + "CHAR:T\n"
+                + " ***** \n"
+                + "   *   \n"
+                + "   *   \n"
+                + "   *   \n"
+                + "   *   \n"
+                + "   *   \n"
+                + "   *   \n"
+                + "\n"
+                + "CHAR:U\n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + "  ***  \n"
+                + "\n"
+                + "CHAR:V\n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + "  * *  \n"
+                + "   *   \n"
+                + "\n"
+                + "CHAR:W\n"
+                + " *   * \n"
+                + " *   * \n"
+                + " *   * \n"
+                + " * * * \n"
+                + " * * * \n"
+                + " ** ** \n"
+                + " *   * \n"
+                + "\n"
+                + "CHAR:X\n"
+                + " *   * \n"
+                + " *   * \n"
+                + "  * *  \n"
+                + "   *   \n"
+                + "  * *  \n"
+                + " *   * \n"
+                + " *   * \n"
+                + "\n"
+                + "CHAR:Y\n"
+                + " *   * \n"
+                + " *   * \n"
+                + "  * *  \n"
+                + "   *   \n"
+                + "   *   \n"
+                + "   *   \n"
+                + "   *   \n"
+                + "\n"
+                + "CHAR:Z\n"
+                + " ***** \n"
+                + "    *  \n"
+                + "   *   \n"
+                + "  *    \n"
+                + " *     \n"
+                + " *     \n"
+                + " ***** \n"
+                + "\n"
+                + "CHAR: \n"
+                + "       \n"
+                + "       \n"
+                + "       \n"
+                + "       \n"
+                + "       \n"
+                + "       \n"
+                + "       \n";
     }
+
     //endregion
 
     //region Parsing Logic
@@ -127,38 +532,6 @@ public class Printer implements AutoCloseable {
             } else if (currentChar != null) {
                 if (!line.isEmpty()) {
                     charLines.add(line);
-                }
-            }
-        }
-        if (currentChar != null && !charLines.isEmpty()) {
-            currentFont.put(currentChar, new ArrayList<>(charLines));
-        }
-    }
-
-    private static void loadJsonFont(List<String> lines) {
-        String content = String.join("\n", lines);
-        content = content.replaceAll("[{}\\[\\]\"]", "");
-
-        String[] entries = content.split(",(?=[A-Za-z0-9А-Яа-я]:|\\s*[A-Za-z0-9А-Яа-я]:)");
-        Character currentChar = null;
-        List<String> charLines = new ArrayList<>();
-
-        for (String entry : entries) {
-            entry = entry.trim();
-            if (entry.contains(":")) {
-                String[] parts = entry.split(":", 2);
-                if (parts.length == 2) {
-                    if (currentChar != null && !charLines.isEmpty()) {
-                        currentFont.put(currentChar, new ArrayList<>(charLines));
-                        fontHeight = charLines.size();
-                    }
-                    currentChar = parts[0].trim().charAt(0);
-                    charLines.clear();
-
-                    String[] fontLines = parts[1].split("\\|");
-                    for (String fontLine : fontLines) {
-                        charLines.add(fontLine.trim());
-                    }
                 }
             }
         }
@@ -209,7 +582,9 @@ public class Printer implements AutoCloseable {
             for (List<String> pattern : charPatterns) {
                 if (row < pattern.size()) {
                     String line = pattern.get(row);
-                    line = line.replace('*', symbol.charAt(0));
+                    if (!symbol.equals("*")) {
+                        line = line.replace('*', symbol.charAt(0));
+                    }
                     System.out.print(line);
                     System.out.print(" ");
                 }
@@ -217,6 +592,10 @@ public class Printer implements AutoCloseable {
             System.out.print(Color.RESET.getCode());
             System.out.println();
         }
+    }
+
+    public static void print(String text, Color color, int[] position) {
+        print(text, color, position, "*");
     }
 
     private static int getMaxLineWidth(List<String> lines) {
