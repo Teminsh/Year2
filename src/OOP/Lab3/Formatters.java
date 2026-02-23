@@ -11,6 +11,7 @@ class StandardFormatter implements ILogFormatter
     public String format(LogLevel level, String message)
     {
         String dateStr = LocalDateTime.now().format(dateFormatter);
+
         return String.format("[%s] [%s] %s", level, dateStr, message);
     }
 }

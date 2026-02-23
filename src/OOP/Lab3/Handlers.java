@@ -1,5 +1,8 @@
 package OOP.Lab3;
 
+import OOP.Lab2.Color;
+import OOP.Lab2.Printer;
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -9,12 +12,10 @@ class ConsoleHandler implements ILogHandler
     @Override
     public void handle(LogLevel level, String message)
     {
-        if (level == LogLevel.ERROR)
-        {
-            System.err.println("CONSOLE: " + message);
-        } else
-        {
-            System.out.println("CONSOLE: " + message);
+        switch (level) {
+            case ERROR -> System.err.println(Color.RED + message + Color.RESET);
+            case WARN -> System.out.println(Color.YELLOW + message + Color.RESET);
+            case INFO -> System.out.println(Color.CYAN + message + Color.RESET);
         }
     }
 }

@@ -33,10 +33,42 @@ EventHandler<PropertyChangingEventArgs> до изменения значения
  */
 //endregion Task
 
-public class Main
-{
-    static void main()
-    {
+public class Main {
+    public static void main(String[] args) {
+        PositiveNumberValidator numberValidator = new PositiveNumberValidator();
+        NotEmptyValidator textValidator = new NotEmptyValidator();
+        ChangeLogger logger = new ChangeLogger();
 
+        Employee emp = new Employee("Alice", 50000, "Developer");
+        emp.propertyChanging.subscribe(numberValidator);
+        emp.propertyChanging.subscribe(textValidator);
+        emp.propertyChanged.subscribe(logger);
+
+        System.out.println(emp);
+        emp.setSalary(60000);
+        emp.setSalary(-10);
+        emp.setName("");
+        emp.setPosition("Team Lead");
+        System.out.println(emp);
+
+        System.out.println();
+
+        Product p = new Product("Laptop", 1500.0, 10);
+        p.propertyChanging.subscribe(numberValidator);
+        p.propertyChanging.subscribe(textValidator);
+        p.propertyChanged.subscribe(logger);
+
+        System.out.println(p);
+        p.setPrice(1399.99);
+        p.setStock(5);
+        p.setStock(-2);
+        p.setTitle(" ");
+        System.out.println(p);
+
+        System.out.println();
+
+        p.propertyChanged.unsubscribe(logger);
+        p.setPrice(1200.0);
+        System.out.println(p);
     }
 }

@@ -46,6 +46,6 @@ class LevelFilter implements ILogFilter
     @Override
     public boolean match(LogLevel level, String message)
     {
-        return level.ordinal() >= minLevel.ordinal();
+        return level == minLevel;
     }
 }

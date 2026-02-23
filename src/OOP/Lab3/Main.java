@@ -70,7 +70,7 @@ public class Main
     private static void testBasics()
     {
         List<ILogFilter> filters = new ArrayList<>();
-        filters.add(new LevelFilter(LogLevel.INFO));
+        filters.add(new LevelFilter(LogLevel.ERROR));
         filters.add(new SimpleLogFilter("System"));
 
         List<ILogFormatter> formatters = new ArrayList<>();
