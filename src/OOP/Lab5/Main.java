@@ -54,10 +54,121 @@ package OOP.Lab5;
  */
 //endregion Task
 
-public class Main
-{
-    static void main()
-    {
+import OOP.Lab5.auth.AuthService;
+import OOP.Lab5.auth.IAuthService;
+import OOP.Lab5.model.User;
+import OOP.Lab5.repository.IUserRepository;
+import OOP.Lab5.repository.UserRepository;
 
+import java.io.File;
+import java.util.List;
+
+public class Main {
+
+    //region Constants
+    private static final String USERS_FILE = "users.dat";
+    private static final String SESSION_FILE = "session.dat";
+    //endregion
+
+    //region Utility
+    private static void printSection(String title) {
+        System.out.println("\n========== " + title + " ==========");
+    }
+
+    private static void cleanUp() {
+        new File(USERS_FILE).delete();
+        new File(SESSION_FILE).delete();
+    }
+    //endregion
+
+    public static void main(String[] args) {
+        // Очищаем файлы от предыдущих запусков для чистой демонстрации
+        cleanUp();
+
+        //region Добавление пользователей
+        printSection("1. Добавление пользователей");
+
+        IUserRepository repo = new UserRepository(USERS_FILE);
+
+        repo.add(User.of(1, "Михаил Захаров", "mzakharov", "pass1"));
+        repo.add(new User(2, "Анна Соколова", "asokolova", "pass2", "anna@mail.ru", "ул. Ленина, 5"));
+        repo.add(User.of(3, "Владимир Иванов", "vivanov", "pass3", "v.ivanov@gmail.com"));
+        repo.add(User.of(4, "Екатерина Попова", "epopova", "pass4", null, "ул. Бабиджона 24"));
+
+        List<User> sorted = repo.getAll().stream().sorted().toList();
+        System.out.println("Пользователи (отсортированы по имени):");
+        sorted.forEach(System.out::println);
+        //endregion
+
+        //region Редактирование свойств пользователя
+        printSection("2. Редактирование свойств пользователя");
+
+        User mikhail = repo.getById(1);
+        System.out.println("До редактирования:  " + mikhail);
+
+        User updatedMikhail = new User(
+                mikhail.id(), mikhail.name(), mikhail.login(),
+                mikhail.password(), "m.zakharov@bfu.ru", "пр. Мира, 14"
+        );
+        repo.update(updatedMikhail);
+
+        System.out.println("После редактирования: " + repo.getById(1));
+        //endregion
+
+        //region Авторизация пользователя
+        printSection("3. Авторизация пользователя");
+
+        IAuthService authService = new AuthService(SESSION_FILE);
+        System.out.println("До входа:   isAuthorized = " + authService.isAuthorized());
+
+        User loginTarget = repo.getByLogin("asokolova");
+        authService.signIn(loginTarget);
+        System.out.println("После входа: isAuthorized = " + authService.isAuthorized());
+        System.out.println("Текущий пользователь: " + authService.getCurrentUser());
+        //endregion
+
+        //region Смена текущего пользователя
+        printSection("4. Смена текущего пользователя");
+
+        authService.signOut(authService.getCurrentUser());
+        System.out.println("После выхода: isAuthorized = " + authService.isAuthorized());
+
+        User newTarget = repo.getByLogin("vivanov");
+        authService.signIn(newTarget);
+        System.out.println("Вошёл новый пользователь: " + authService.getCurrentUser());
+        //endregion
+
+        //region Автоматическая авторизация при повторном запуске
+        printSection("5. Автоматическая авторизация при повторном запуске");
+
+        IAuthService restoredSession = new AuthService(SESSION_FILE);
+        System.out.println("Новая сессия - isAuthorized = " + restoredSession.isAuthorized());
+        System.out.println("Авто-авторизован как: " + restoredSession.getCurrentUser());
+        //endregion
+
+        //region Демонстрация защиты от дурака
+        printSection("6. Демонстрация 'Защиты от дурака'");
+
+        System.out.println("Попытка 1: Создание пользователя с пустым именем");
+        try {
+            User badUser = User.of(5, "   ", "newlogin", "1234");
+        } catch (IllegalArgumentException e) {
+            System.out.println("Успешно заблокировано: " + e.getMessage());
+        }
+
+        System.out.println("\nПопытка 2: Добавление пользователя с уже занятым логином");
+        try {
+            repo.add(User.of(6, "Новый Человек", "mzakharov", "qwerty"));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Успешно заблокировано: " + e.getMessage());
+        }
+
+        System.out.println("\nПопытка 3: Обновление несуществующего пользователя");
+        try {
+            repo.update(User.of(999, "Призрак", "ghost", "000"));
+        } catch (IllegalArgumentException e) {
+            System.out.println("Успешно заблокировано: " + e.getMessage());
+        }
+        //endregion
     }
 }
