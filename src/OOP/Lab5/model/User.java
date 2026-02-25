@@ -33,10 +33,15 @@ public record User(
         return new User(id, name, login, password, null, null);
     }
 
-    public static User of(int id, String name, String login, String password, String email) {
+    public static User withEmail(int id, String name, String login, String password, String email) {
         return new User(id, name, login, password, email, null);
     }
-    public static User of(int id, String name, String login, String password, String email, String address) {
+
+    public static User withAddress(int id, String name, String login, String password, String address) {
+        return new User(id, name, login, password, null, address);
+    }
+
+    public static User withAll(int id, String name, String login, String password, String email, String address) {
         return new User(id, name, login, password, email, address);
     }
     //endregion

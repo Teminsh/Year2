@@ -1,0 +1,3 @@
+v:1
+b:a|printChar|ch=a
+b:ctrl++|volumeUp|

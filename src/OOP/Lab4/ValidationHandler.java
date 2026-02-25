@@ -50,5 +50,4 @@ class RangeValidator implements EventHandler<PropertyChangingEventArgs> {
             }
         }
     }
-
 }

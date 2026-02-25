@@ -1,6 +1,4 @@
-package OOP.Lab6;
-
-//region Task
+package OOP.Lab6;//region Task
 /*
 Лабораторная работа 6 (виртуальная клавиатура)
 
@@ -51,10 +49,115 @@ Keyboard, KeyCommand, VolumeUpCommand, VolumeDownCommand, MediaPlayerCommand, Ke
  */
 //endregion Task
 
-public class Main
-{
-    static void main()
-    {
+import OOP.Lab6.commands.CommandRegistry;
+import OOP.Lab6.io.DualOutput;
+import OOP.Lab6.receivers.MediaPlayer;
+import OOP.Lab6.receivers.TextBuffer;
+import OOP.Lab6.receivers.VolumeSystem;
+import OOP.Lab6.serialization.KeyboardMementoMapper;
+import OOP.Lab6.serialization.TextSerializer;
 
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        Path outFile = Path.of("output.txt");
+        Path stateFile = Path.of("keyboard_state.txt");
+
+        try (DualOutput output = new DualOutput(outFile)) {
+            TextBuffer textBuffer = new TextBuffer();
+            VolumeSystem volume = new VolumeSystem(20);
+            MediaPlayer mediaPlayer = new MediaPlayer();
+
+            CommandRegistry registry = new CommandRegistry();
+            registry.register("printChar", p -> new OOP.Lab6.commands.PrintCharCommand(textBuffer, getChar(p, "ch")));
+            registry.register("volumeUp", p -> new OOP.Lab6.commands.VolumeUpCommand(volume));
+            registry.register("volumeDown", p -> new OOP.Lab6.commands.VolumeDownCommand(volume));
+            registry.register("mediaPlayer", p -> new OOP.Lab6.commands.MediaPlayerCommand(mediaPlayer));
+
+            Keyboard keyboard = new Keyboard(registry, output);
+            KeyboardStateSaver saver = new KeyboardStateSaver(
+                    stateFile,
+                    new TextSerializer(),
+                    new KeyboardMementoMapper()
+            );
+
+            saver.tryLoadInto(keyboard, output);
+            runInteractiveLoop(keyboard, registry, output);
+            saver.saveFrom(keyboard);
+
+        } catch (Exception e) {
+            System.out.println("FATAL ERROR: " + e.getMessage());
+        }
     }
+
+    //region loop
+    private static void runInteractiveLoop(Keyboard keyboard, CommandRegistry registry, DualOutput output) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Keyboard started. Type 'bind <key> <cmd> [args]', 'undo', 'redo', a key to press, or 'exit'.");
+
+        while (true) {
+            String line = scanner.nextLine().trim();
+            if (line.equalsIgnoreCase("exit")) break;
+            if (line.isEmpty()) continue;
+
+            try {
+                if (line.equals("undo")) {
+                    keyboard.undo();
+                } else if (line.equals("redo")) {
+                    keyboard.redo();
+                } else if (line.startsWith("bind ")) {
+                    handleBind(line, keyboard, registry);
+                } else {
+                    keyboard.press(line);
+                }
+            } catch (IllegalArgumentException e) {
+                output.log("ERROR", "Invalid input: " + e.getMessage());
+            } catch (Exception e) {
+                output.log("ERROR", "Unexpected error: " + e.getMessage());
+            }
+        }
+    }
+
+    private static void handleBind(String line, Keyboard keyboard, CommandRegistry registry) {
+        String[] parts = line.split("\\s+");
+        if (parts.length < 3) {
+            throw new IllegalArgumentException("Usage: bind <key> <command> [paramKey=paramValue...]");
+        }
+
+        String key = parts[1];
+        String cmd = parts[2];
+
+        if (!registry.hasCommand(cmd)) {
+            throw new IllegalArgumentException("Unknown command type: " + cmd);
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        if (parts.length > 3) {
+            for (int i = 3; i < parts.length; i++) {
+                String[] kv = parts[i].split("=");
+                if (kv.length == 2) {
+                    params.put(kv[0], kv[1]);
+                } else {
+                    throw new IllegalArgumentException("Invalid param format: " + parts[i]);
+                }
+            }
+        }
+        keyboard.bind(key, cmd, params);
+        System.out.println("Bound '" + key + "' to '" + cmd + "'");
+    }
+    //endregion
+
+    //region helpers
+    private static char getChar(Map<String, Object> params, String key) {
+        Object v = params.get(key);
+        if (v == null) throw new IllegalArgumentException("Missing param: " + key);
+        String s = String.valueOf(v);
+        if (s.isEmpty()) throw new IllegalArgumentException("Empty char param: " + key);
+        return s.charAt(0);
+    }
+    //endregion
 }
