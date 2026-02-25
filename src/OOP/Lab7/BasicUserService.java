@@ -1,27 +1,17 @@
 package OOP.Lab7;
 
 public class BasicUserService implements IUserService {
-    private final ILogger logger;
     private final INotificationService notificationService;
 
-    public BasicUserService(ILogger logger, INotificationService notificationService) {
-        this.logger = logger;
+    public BasicUserService(INotificationService notificationService) {
+        if (notificationService == null) {
+            throw new IllegalArgumentException("Notification service cannot be null");
+        }
         this.notificationService = notificationService;
     }
 
     @Override
-    public void createUser(String username) {
-        logger.log("Creating user: " + username);
-        notificationService.send(username, "Welcome, " + username + "!");
-    }
-
-    @Override
-    public void deleteUser(String username) {
-        logger.log("Deleting user: " + username);
-    }
-
-    @Override
-    public String getInfo() {
-        return "BasicUserService@" + Integer.toHexString(hashCode());
+    public void executeAction(String username) {
+        notificationService.send("Action executed by basic user: " + username);
     }
 }

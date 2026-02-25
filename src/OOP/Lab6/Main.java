@@ -23,20 +23,20 @@ package OOP.Lab6;//region Task
 - механизм сериализации и десираилизации в отдельногм классе
 - механизм представления класса в виде словря также в отдельном классе
 
-Вывод работы программы сделать либо в консоль либо в текстовый файл в подобном  виде (это приер, его повторять необязательно):
+Вывод работы программы сделать либо в консоль либо в текстовый файл в подобном  виде (это пример, его повторять необязательно):
 CONSOLE:                                                    TEXT FILE:
 a                                                                    a
 b                                                                    ab
 c                                                                    abc
-undo                                                             ab
-undo                                                             a
-redo                                                              ab
-ctrl++                                                            volume increased +20%
-ctrl+-                                                             volume decreased +20%
-ctrl+p                                                           media player launched
-d                                                                   abd
-undo                                                            ab
-undo                                                            media player closed
+undo                                                                 ab
+undo                                                                 a
+redo                                                                 ab
+ctrl++                                                               volume increased +20%
+ctrl+-                                                               volume decreased +20%
+ctrl+p                                                               media player launched
+d                                                                    abd
+undo                                                                 ab
+undo                                                                 media player closed
 
 Работу приложение выводить в текстовый файл и в консоль
 

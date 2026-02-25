@@ -14,8 +14,7 @@ public class Binding<T> {
     //endregion
 
     //region Constructors
-    public Binding(Class<T> interfaceType, Class<? extends T> implementationType,
-                   LifeStyle lifeStyle, Object[] extraParams) {
+    public Binding(Class<T> interfaceType, Class<? extends T> implementationType, LifeStyle lifeStyle, Object[] extraParams) {
         this.interfaceType = interfaceType;
         this.implementationType = implementationType;
         this.factory = null;
@@ -33,13 +32,13 @@ public class Binding<T> {
     //endregion
 
     //region Accessors
-    public Class<T> getInterfaceType()               { return interfaceType; }
+    public Class<T> getInterfaceType() { return interfaceType; }
     public Class<? extends T> getImplementationType() { return implementationType; }
-    public Supplier<? extends T> getFactory()         { return factory; }
-    public LifeStyle getLifeStyle()                   { return lifeStyle; }
-    public Object[] getExtraParams()                  { return extraParams; }
-    public T getSingletonInstance()                   { return singletonInstance; }
-    public void setSingletonInstance(T instance)      { this.singletonInstance = instance; }
-    public boolean hasFactory()                       { return factory != null; }
+    public Supplier<? extends T> getFactory() { return factory; }
+    public LifeStyle getLifeStyle() { return lifeStyle; }
+    public Object[] getExtraParams() { return extraParams; }
+    public T getSingletonInstance() { return singletonInstance; }
+    public void setSingletonInstance(T instance) { this.singletonInstance = instance; }
+    public boolean hasFactory() { return factory != null; }
     //endregion
 }

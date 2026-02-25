@@ -1,28 +1,20 @@
 package OOP.Lab7;
 
 public class AdminUserService implements IUserService {
-    private final ILogger logger;
     private final INotificationService notificationService;
+    private final ILogger logger;
 
-    public AdminUserService(ILogger logger, INotificationService notificationService) {
-        this.logger = logger;
+    public AdminUserService(INotificationService notificationService, ILogger logger) {
+        if (notificationService == null || logger == null) {
+            throw new IllegalArgumentException("Dependencies cannot be null");
+        }
         this.notificationService = notificationService;
+        this.logger = logger;
     }
 
     @Override
-    public void createUser(String username) {
-        logger.log("[ADMIN] Creating user: " + username);
-        notificationService.send(username, "[ADMIN] Account created for " + username);
-    }
-
-    @Override
-    public void deleteUser(String username) {
-        logger.log("[ADMIN] Archiving user: " + username);
-        notificationService.send(username, "Your account has been deactivated.");
-    }
-
-    @Override
-    public String getInfo() {
-        return "AdminUserService@" + Integer.toHexString(hashCode());
+    public void executeAction(String username) {
+        logger.log("ADMIN ACTION TRIGGERED");
+        notificationService.send("Admin executed system override: " + username);
     }
 }

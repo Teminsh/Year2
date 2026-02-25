@@ -4,16 +4,15 @@ public class FileLogger implements ILogger {
     private final String filePath;
 
     public FileLogger(String filePath) {
+        if (filePath == null || filePath.trim().isEmpty()) {
+            throw new IllegalArgumentException("File path cannot be null or empty");
+        }
         this.filePath = filePath;
     }
 
     @Override
     public void log(String message) {
-        System.out.println("[FILE:" + filePath + "] " + message);
-    }
-
-    @Override
-    public String getName() {
-        return "FileLogger@" + Integer.toHexString(hashCode());
+        if (message == null) return;
+        System.out.println("[FILE: " + filePath + "] " + message);
     }
 }

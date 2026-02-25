@@ -37,113 +37,118 @@ public class Main {
 
     //region Entry Point
     public static void main(String[] args) {
-        System.out.println("========== Debug Configuration ==========\n");
-        demoDebugConfig();
+        System.out.println("=========== DEMO 1: LIFE STYLES (PER_REQUEST, SINGLETON, SCOPED) ===========");
+        demoLifeStyles();
 
-        System.out.println("\n========== Release Configuration ==========\n");
-        demoReleaseConfig();
+        System.out.println("\n=========== DEMO 2: FACTORY METHOD ===========");
+        demoFactoryMethod();
 
-        System.out.println("\n========== Factory Method ==========\n");
-        demoFactory();
+        System.out.println("\n=========== DEMO 3: FOOL-PROOFING ===========");
+        demoFoolProofing();
     }
     //endregion
 
-    //region Debug Demo
-    private static void demoDebugConfig() {
+    //region Demos
+    private static void demoLifeStyles() {
         Injector injector = DebugConfiguration.create();
 
-        System.out.println("[ PER_REQUEST: ILogger -> ConsoleLogger ]");
-        ILogger l1 = injector.getInstance(ILogger.class);
-        ILogger l2 = injector.getInstance(ILogger.class);
-        l1.log("First call");
-        l2.log("Second call");
-        System.out.println("Same instance? " + (l1 == l2));
-        System.out.println("l1: " + l1.getName());
-        System.out.println("l2: " + l2.getName());
+        System.out.println("--- PER_REQUEST ---");
+        ILogger logger1 = injector.getInstance(ILogger.class);
+        ILogger logger2 = injector.getInstance(ILogger.class);
+        System.out.println("Logger 1 hash: " + Integer.toHexString(logger1.hashCode()));
+        System.out.println("Logger 2 hash: " + Integer.toHexString(logger2.hashCode()));
+        System.out.println("Are they the same instance? " + (logger1 == logger2));
 
-        System.out.println("\n[ SCOPED: IUserService -> BasicUserService ]");
-        System.out.println("--- Scope 1 ---");
-        try (Scope scope1 = injector.beginScope()) {
-            IUserService us1 = injector.getInstance(IUserService.class);
-            IUserService us2 = injector.getInstance(IUserService.class);
-            System.out.println("Same in scope? " + (us1 == us2));
-            us1.createUser("Alice");
-            us2.createUser("Bob");
+        System.out.println("\n--- SINGLETON ---");
+        Injector releaseInjector = ReleaseConfiguration.create();
+        ILogger fileLogger1 = releaseInjector.getInstance(ILogger.class);
+        ILogger fileLogger2 = releaseInjector.getInstance(ILogger.class);
+        System.out.println("FileLogger 1 hash: " + Integer.toHexString(fileLogger1.hashCode()));
+        System.out.println("FileLogger 2 hash: " + Integer.toHexString(fileLogger2.hashCode()));
+        System.out.println("Are they the same instance? " + (fileLogger1 == fileLogger2));
+
+        System.out.println("\n--- SCOPED ---");
+        try (Scope scope1 = releaseInjector.beginScope()) {
+            INotificationService sms1 = releaseInjector.getInstance(INotificationService.class);
+            INotificationService sms2 = releaseInjector.getInstance(INotificationService.class);
+            System.out.println("Inside Scope 1 - Are they the same instance? " + (sms1 == sms2));
+
+            sms1.send("Test SMS from Scope 1");
         }
 
-        System.out.println("--- Scope 2 (новый экземпляр) ---");
-        try (Scope scope2 = injector.beginScope()) {
-            IUserService us3 = injector.getInstance(IUserService.class);
-            System.out.println("New scope instance: " + us3.getInfo());
-            us3.deleteUser("Alice");
-        }
-
-        System.out.println("\n[ PER_REQUEST: INotificationService -> EmailNotificationService ]");
-        INotificationService ns1 = injector.getInstance(INotificationService.class);
-        INotificationService ns2 = injector.getInstance(INotificationService.class);
-        ns1.send("user@test.com", "Msg 1");
-        ns2.send("user@test.com", "Msg 2");
-        System.out.println("Same instance? " + (ns1 == ns2));
-        System.out.println("ns1: " + ns1.getType());
-        System.out.println("ns2: " + ns2.getType());
-    }
-    //endregion
-
-    //region Release Demo
-    private static void demoReleaseConfig() {
-        Injector injector = ReleaseConfiguration.create();
-
-        System.out.println("[ SINGLETON: ILogger -> FileLogger ]");
-        ILogger l1 = injector.getInstance(ILogger.class);
-        ILogger l2 = injector.getInstance(ILogger.class);
-        l1.log("Entry 1");
-        l2.log("Entry 2");
-        System.out.println("Same instance? " + (l1 == l2));
-        System.out.println("Logger: " + l1.getName());
-
-        System.out.println("\n[ SINGLETON: IUserService -> AdminUserService ]");
-        System.out.println("Примечание: AdminUserService (Singleton) зависит от SmsNotificationService");
-        System.out.println("(Scoped) — это 'captive dependency'. Первый вызов требует открытого scope.");
-        try (Scope warmUp = injector.beginScope()) {
-            IUserService admin = injector.getInstance(IUserService.class);
-            admin.createUser("Dave");
-        }
-        IUserService admin1 = injector.getInstance(IUserService.class);
-        IUserService admin2 = injector.getInstance(IUserService.class);
-        System.out.println("Same singleton? " + (admin1 == admin2));
-        admin1.deleteUser("Dave");
-
-        System.out.println("\n[ SCOPED: INotificationService -> SmsNotificationService ]");
-        try (Scope scope = injector.beginScope()) {
-            INotificationService ns1 = injector.getInstance(INotificationService.class);
-            INotificationService ns2 = injector.getInstance(INotificationService.class);
-            System.out.println("Same in scope? " + (ns1 == ns2));
-            ns1.send("+79001234567", "Release alert");
-            System.out.println("Service: " + ns1.getType());
+        try (Scope scope2 = releaseInjector.beginScope()) {
+            INotificationService sms3 = releaseInjector.getInstance(INotificationService.class);
+            System.out.println("Inside Scope 2 - Created a new Scoped instance!");
+            sms3.send("Test SMS from Scope 2");
         }
     }
-    //endregion
 
-    //region Factory Demo
-    private static void demoFactory() {
+    private static void demoFactoryMethod() {
         Injector injector = new Injector();
-        int[] callCount = {0};
 
-        injector.register(ILogger.class, () -> {
-            callCount[0]++;
-            System.out.println("Factory: creating logger #" + callCount[0]);
-            return new ConsoleLogger();
+        injector.register(ILogger.class, ConsoleLogger::new);
+
+        ILogger logger1 = injector.getInstance(ILogger.class);
+        logger1.log("This logger was created via a Factory Method (Supplier)!");
+    }
+
+    private static void demoFoolProofing() {
+        Injector injector = new Injector();
+
+        executeWithErrorHandling("1. Null registration attempt", () ->
+                injector.register(null, ConsoleLogger.class, LifeStyle.SINGLETON)
+        );
+
+        executeWithErrorHandling("2. Abstract class/Interface registration attempt", () ->
+                injector.register((Class) ILogger.class, (Class) ILogger.class, LifeStyle.SINGLETON)
+        );
+
+        injector.register(ILogger.class, ConsoleLogger.class, LifeStyle.PER_REQUEST);
+
+        executeWithErrorHandling("3. Duplicate registration attempt", () ->
+                injector.register(ILogger.class, FileLogger.class, LifeStyle.SINGLETON)
+        );
+
+        executeWithErrorHandling("4. Requesting unregistered dependency", () ->
+                injector.getInstance(IUserService.class)
+        );
+
+        injector.register(INotificationService.class, SmsNotificationService.class, LifeStyle.SCOPED, "+1");
+
+        executeWithErrorHandling("5. Requesting SCOPED dependency without active scope", () ->
+                injector.getInstance(INotificationService.class)
+        );
+
+        executeWithErrorHandling("6. Nested scopes attempt", () -> {
+            try (Scope scope1 = injector.beginScope()) {
+                try (Scope scope2 = injector.beginScope()) {
+                    System.out.println("This won't be reached");
+                }
+            }
         });
 
-        ILogger fl1 = injector.getInstance(ILogger.class);
-        ILogger fl2 = injector.getInstance(ILogger.class);
-        fl1.log("Factory logger call 1");
-        fl2.log("Factory logger call 2");
-        System.out.println("Factory вызван: " + callCount[0] + " раза");
-        System.out.println("Same instance? " + (fl1 == fl2));
-        System.out.println("fl1: " + fl1.getName());
-        System.out.println("fl2: " + fl2.getName());
+        executeWithErrorHandling("7. Circular Dependency attempt", () -> {
+            Injector badInjector = new Injector();
+            badInjector.register(CircularClass.class, CircularClass.class, LifeStyle.PER_REQUEST);
+            badInjector.getInstance(CircularClass.class);
+        });
+    }
+    //endregion
+
+    //region Utilities
+    private static void executeWithErrorHandling(String actionDescription, Runnable action) {
+        System.out.println(actionDescription);
+        try {
+            action.run();
+            System.out.println("  -> SUCCESS (Unexpected!)");
+        } catch (Exception e) {
+            System.out.println("  -> BLOCKED: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        }
+        System.out.println();
+    }
+
+    public static class CircularClass {
+        public CircularClass(CircularClass selfDependency) { }
     }
     //endregion
 }
-
