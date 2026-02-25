@@ -23,7 +23,15 @@ public class Injector {
 
     public <T> void register(Class<T> interfaceType, Class<? extends T> implType, LifeStyle lifeStyle, Object... params) {
         validateRegistration(interfaceType, implType, lifeStyle);
-        bindings.put(interfaceType, new Binding<>(interfaceType, implType, lifeStyle, params));
+        bindings.put(interfaceType, new Binding<>(interfaceType, implType, lifeStyle, 0, params));
+    }
+
+    public <T> void registerPool(Class<T> interfaceType, Class<? extends T> implType, int limit, Object... params) {
+        validateRegistration(interfaceType, implType, LifeStyle.POOL);
+        if (limit <= 0) {
+            throw new IllegalArgumentException("Limit must be greater than 0 for POOL LifeStyle");
+        }
+        bindings.put(interfaceType, new Binding<>(interfaceType, implType, LifeStyle.POOL, limit, params));
     }
 
     public <T> void register(Class<T> interfaceType, Supplier<? extends T> factory) {
@@ -73,6 +81,7 @@ public class Injector {
                 case PER_REQUEST -> createInstance(binding);
                 case SINGLETON -> resolveSingleton(binding);
                 case SCOPED -> resolveScoped(binding);
+                case POOL -> resolvePool(binding);
             };
         } finally {
             resolutionStack.get().remove(interfaceType);
@@ -97,6 +106,21 @@ public class Injector {
             throw new IllegalStateException("Scoped instance requested outside of an active Scope");
         }
         return (T) scope.computeIfAbsent(binding.getInterfaceType(), k -> createInstance(binding));
+    }
+
+    private <T> T resolvePool(Binding<T> binding) {
+        synchronized (binding) {
+            int count = binding.getRequestCount();
+            binding.setRequestCount(count + 1);
+
+            if (binding.getPoolInstances().size() < binding.getLimit()) {
+                T instance = createInstance(binding);
+                binding.getPoolInstances().add(instance);
+                return instance;
+            } else {
+                return binding.getPoolInstances().get(count % binding.getLimit());
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -151,47 +175,6 @@ public class Injector {
 
     void exitScope() {
         scopedInstances.remove();
-    }
-    //endregion
-
-    //region Dependency Tree
-    public void printDependencyTree(Class<?> interfaceType) {
-        System.out.println("\nDependency Tree for: " + interfaceType.getSimpleName());
-        printTreeRecursive(interfaceType, "", true, new HashSet<>());
-    }
-
-    private void printTreeRecursive(Class<?> type, String prefix, boolean isTail, Set<Class<?>> visited) {
-        Binding<?> binding = bindings.get(type);
-        if (binding == null) {
-            System.out.println(prefix + (isTail ? "└── " : "├── ") + type.getSimpleName() + " (Unregistered!)");
-            return;
-        }
-
-        Class<?> implType = binding.getImplementationType();
-        String nodeName = type.getSimpleName() + " -> " +
-                (implType != null ? implType.getSimpleName() : "Factory Method");
-
-        System.out.println(prefix + (isTail ? "└── " : "├── ") + nodeName);
-
-        if (!visited.add(type)) {
-            System.out.println(prefix + (isTail ? "    " : "│   ") + "└── [Circular Dependency Detected!]");
-            return;
-        }
-
-        if (implType != null) {
-            Constructor<?>[] constructors = implType.getConstructors();
-            if (constructors.length > 0) {
-                Class<?>[] paramTypes = constructors[0].getParameterTypes();
-                for (int i = 0; i < paramTypes.length; i++) {
-                    Class<?> paramType = paramTypes[i];
-                    if (bindings.containsKey(paramType)) {
-                        boolean isLast = (i == paramTypes.length - 1);
-                        String newPrefix = prefix + (isTail ? "    " : "│   ");
-                        printTreeRecursive(paramType, newPrefix, isLast, new HashSet<>(visited));
-                    }
-                }
-            }
-        }
     }
     //endregion
 }

@@ -37,33 +37,39 @@ public class Main {
 
     //region Entry Point
     public static void main(String[] args) {
-        System.out.println("=========== DEMO 1: LIFE STYLES (PER_REQUEST, SINGLETON, SCOPED) ===========");
+        System.out.println("=========== DEMO 1: LIFE STYLES ===========");
         demoLifeStyles();
 
         System.out.println("\n=========== DEMO 2: FACTORY METHOD ===========");
         demoFactoryMethod();
 
-        System.out.println("\n=========== DEMO 3: FOOL-PROOFING ===========");
+        System.out.println("\n=========== DEMO 3: POOL LIFESTYLE ===========");
+        demoPoolLifeStyle();
+
+        System.out.println("\n=========== DEMO 4: FOOL-PROOFING ===========");
         demoFoolProofing();
 
-        System.out.println("\n=========== DEMO 4: DEPENDENCY TREE ===========");
-        demoDependencyTree();
     }
     //endregion
 
     //region Demos
     private static void demoLifeStyles() {
-        Injector injector = DebugConfiguration.create();
+        Injector debugInjector = DebugConfiguration.create();
 
         System.out.println("--- PER_REQUEST ---");
-        ILogger logger1 = injector.getInstance(ILogger.class);
-        ILogger logger2 = injector.getInstance(ILogger.class);
+        ILogger logger1 = debugInjector.getInstance(ILogger.class);
+        ILogger logger2 = debugInjector.getInstance(ILogger.class);
         System.out.println("Logger 1 hash: " + Integer.toHexString(logger1.hashCode()));
         System.out.println("Logger 2 hash: " + Integer.toHexString(logger2.hashCode()));
         System.out.println("Are they the same instance? " + (logger1 == logger2));
 
-        System.out.println("\n--- SINGLETON ---");
+        System.out.println("\n[Triggering Basic User Action...]");
+        IUserService basicUser = debugInjector.getInstance(IUserService.class);
+        basicUser.executeAction("Ivan_Student");
+
         Injector releaseInjector = ReleaseConfiguration.create();
+
+        System.out.println("\n--- SINGLETON ---");
         ILogger fileLogger1 = releaseInjector.getInstance(ILogger.class);
         ILogger fileLogger2 = releaseInjector.getInstance(ILogger.class);
         System.out.println("FileLogger 1 hash: " + Integer.toHexString(fileLogger1.hashCode()));
@@ -77,13 +83,42 @@ public class Main {
             System.out.println("Inside Scope 1 - Are they the same instance? " + (sms1 == sms2));
 
             sms1.send("Test SMS from Scope 1");
+
+            System.out.println("\n[Triggering Admin User Action...]");
+            IUserService adminUser = releaseInjector.getInstance(IUserService.class);
+            adminUser.executeAction("SuperAdmin_Ivan");
         }
 
         try (Scope scope2 = releaseInjector.beginScope()) {
             INotificationService sms3 = releaseInjector.getInstance(INotificationService.class);
-            System.out.println("Inside Scope 2 - Created a new Scoped instance!");
+            System.out.println("\nInside Scope 2 - Created a new Scoped instance!");
             sms3.send("Test SMS from Scope 2");
         }
+    }
+
+    private static void demoPoolLifeStyle() {
+        Injector injector = new Injector();
+        int poolLimit = 3;
+
+        injector.registerPool(ILogger.class, ConsoleLogger.class, poolLimit);
+
+        System.out.println("Requesting 5 objects consecutively with a pool limit of = " + poolLimit);
+
+        ILogger l1 = injector.getInstance(ILogger.class);
+        ILogger l2 = injector.getInstance(ILogger.class);
+        ILogger l3 = injector.getInstance(ILogger.class);
+        ILogger l4 = injector.getInstance(ILogger.class);
+        ILogger l5 = injector.getInstance(ILogger.class);
+
+        System.out.println("Instance 1: " + Integer.toHexString(l1.hashCode()));
+        System.out.println("Instance 2: " + Integer.toHexString(l2.hashCode()));
+        System.out.println("Instance 3: " + Integer.toHexString(l3.hashCode()));
+        System.out.println("Instance 4: " + Integer.toHexString(l4.hashCode()));
+        System.out.println("Instance 5: " + Integer.toHexString(l5.hashCode()));
+
+        System.out.println("\nПроверка равенства ссылок:");
+        System.out.println("l1 == l4 ? " + (l1 == l4));
+        System.out.println("l2 == l5 ? " + (l2 == l5));
     }
 
     private static void demoFactoryMethod() {
@@ -135,11 +170,6 @@ public class Main {
             badInjector.register(CircularClass.class, CircularClass.class, LifeStyle.PER_REQUEST);
             badInjector.getInstance(CircularClass.class);
         });
-    }
-
-    private static void demoDependencyTree() {
-        Injector releaseInjector = ReleaseConfiguration.create();
-        releaseInjector.printDependencyTree(IUserService.class);
     }
     //endregion
 
