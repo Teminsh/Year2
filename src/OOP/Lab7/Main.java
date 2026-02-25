@@ -45,6 +45,9 @@ public class Main {
 
         System.out.println("\n=========== DEMO 3: FOOL-PROOFING ===========");
         demoFoolProofing();
+
+        System.out.println("\n=========== DEMO 4: DEPENDENCY TREE ===========");
+        demoDependencyTree();
     }
     //endregion
 
@@ -132,6 +135,11 @@ public class Main {
             badInjector.register(CircularClass.class, CircularClass.class, LifeStyle.PER_REQUEST);
             badInjector.getInstance(CircularClass.class);
         });
+    }
+
+    private static void demoDependencyTree() {
+        Injector releaseInjector = ReleaseConfiguration.create();
+        releaseInjector.printDependencyTree(IUserService.class);
     }
     //endregion
 

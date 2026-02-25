@@ -153,4 +153,45 @@ public class Injector {
         scopedInstances.remove();
     }
     //endregion
+
+    //region Dependency Tree
+    public void printDependencyTree(Class<?> interfaceType) {
+        System.out.println("\nDependency Tree for: " + interfaceType.getSimpleName());
+        printTreeRecursive(interfaceType, "", true, new HashSet<>());
+    }
+
+    private void printTreeRecursive(Class<?> type, String prefix, boolean isTail, Set<Class<?>> visited) {
+        Binding<?> binding = bindings.get(type);
+        if (binding == null) {
+            System.out.println(prefix + (isTail ? "└── " : "├── ") + type.getSimpleName() + " (Unregistered!)");
+            return;
+        }
+
+        Class<?> implType = binding.getImplementationType();
+        String nodeName = type.getSimpleName() + " -> " +
+                (implType != null ? implType.getSimpleName() : "Factory Method");
+
+        System.out.println(prefix + (isTail ? "└── " : "├── ") + nodeName);
+
+        if (!visited.add(type)) {
+            System.out.println(prefix + (isTail ? "    " : "│   ") + "└── [Circular Dependency Detected!]");
+            return;
+        }
+
+        if (implType != null) {
+            Constructor<?>[] constructors = implType.getConstructors();
+            if (constructors.length > 0) {
+                Class<?>[] paramTypes = constructors[0].getParameterTypes();
+                for (int i = 0; i < paramTypes.length; i++) {
+                    Class<?> paramType = paramTypes[i];
+                    if (bindings.containsKey(paramType)) {
+                        boolean isLast = (i == paramTypes.length - 1);
+                        String newPrefix = prefix + (isTail ? "    " : "│   ");
+                        printTreeRecursive(paramType, newPrefix, isLast, new HashSet<>(visited));
+                    }
+                }
+            }
+        }
+    }
+    //endregion
 }
