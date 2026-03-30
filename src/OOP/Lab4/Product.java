@@ -1,24 +1,18 @@
 package OOP.Lab4;
 
 public class Product {
-    //region Fields
     private String title;
     private double price;
     private int stock;
-    //endregion
 
-    //region Events
     public final Event<PropertyChangingEventArgs> propertyChanging = new Event<>();
     public final Event<PropertyChangedEventArgs> propertyChanged = new Event<>();
-    //endregion
 
-    //region Constructor
     public Product(String title, double price, int stock) {
         this.title = title;
         this.price = price;
         this.stock = stock;
     }
-    //endregion
 
     //region Setters
     public void setTitle(String newTitle) {

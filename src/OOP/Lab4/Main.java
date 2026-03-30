@@ -40,14 +40,17 @@ public class Main {
         ChangeLogger logger = new ChangeLogger();
 
         Employee emp = new Employee("Alice", 50000, "Developer");
+        RangeValidator salaryRange = new RangeValidator("salary", 0, 200000);
         emp.propertyChanging.subscribe(numberValidator);
         emp.propertyChanging.subscribe(textValidator);
+        emp.propertyChanging.subscribe(salaryRange);
         emp.propertyChanged.subscribe(logger);
 
         System.out.println(emp);
         emp.setSalary(60000);
         emp.setSalary(-10);
         emp.setName("");
+        emp.setSalary(1000000);
         emp.setPosition("Team Lead");
         System.out.println(emp);
 

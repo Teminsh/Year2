@@ -33,10 +33,160 @@ package OOP.Lab7;
  */
 //endregion Task
 
-public class Main
-{
-    static void main()
-    {
+public class Main {
+
+    //region Entry Point
+    public static void main(String[] args) {
+        System.out.println("=========== DEMO 1: LIFE STYLES ===========");
+        demoLifeStyles();
+
+        System.out.println("\n=========== DEMO 2: FACTORY METHOD ===========");
+        demoFactoryMethod();
+
+        System.out.println("\n=========== DEMO 3: POOL LIFESTYLE ===========");
+        demoPoolLifeStyle();
+
+        System.out.println("\n=========== DEMO 4: FOOL-PROOFING ===========");
+        demoFoolProofing();
 
     }
+    //endregion
+
+    //region Demos
+    private static void demoLifeStyles() {
+        Injector debugInjector = DebugConfiguration.create();
+
+        System.out.println("--- PER_REQUEST ---");
+        ILogger logger1 = debugInjector.getInstance(ILogger.class);
+        ILogger logger2 = debugInjector.getInstance(ILogger.class);
+        System.out.println("Logger 1 hash: " + Integer.toHexString(logger1.hashCode()));
+        System.out.println("Logger 2 hash: " + Integer.toHexString(logger2.hashCode()));
+        System.out.println("Are they the same instance? " + (logger1 == logger2));
+
+        System.out.println("\n[Triggering Basic User Action...]");
+        IUserService basicUser = debugInjector.getInstance(IUserService.class);
+        basicUser.executeAction("Ivan_Student");
+
+        Injector releaseInjector = ReleaseConfiguration.create();
+
+        System.out.println("\n--- SINGLETON ---");
+        ILogger fileLogger1 = releaseInjector.getInstance(ILogger.class);
+        ILogger fileLogger2 = releaseInjector.getInstance(ILogger.class);
+        System.out.println("FileLogger 1 hash: " + Integer.toHexString(fileLogger1.hashCode()));
+        System.out.println("FileLogger 2 hash: " + Integer.toHexString(fileLogger2.hashCode()));
+        System.out.println("Are they the same instance? " + (fileLogger1 == fileLogger2));
+
+        System.out.println("\n--- SCOPED ---");
+        try (Scope scope1 = releaseInjector.beginScope()) {
+            INotificationService sms1 = releaseInjector.getInstance(INotificationService.class);
+            INotificationService sms2 = releaseInjector.getInstance(INotificationService.class);
+            System.out.println("Inside Scope 1 - Are they the same instance? " + (sms1 == sms2));
+
+            sms1.send("Test SMS from Scope 1");
+
+            System.out.println("\n[Triggering Admin User Action...]");
+            IUserService adminUser = releaseInjector.getInstance(IUserService.class);
+            adminUser.executeAction("SuperAdmin_Ivan");
+        }
+
+        try (Scope scope2 = releaseInjector.beginScope()) {
+            INotificationService sms3 = releaseInjector.getInstance(INotificationService.class);
+            System.out.println("\nInside Scope 2 - Created a new Scoped instance!");
+            sms3.send("Test SMS from Scope 2");
+        }
+    }
+
+    private static void demoPoolLifeStyle() {
+        Injector injector = new Injector();
+        int poolLimit = 3;
+
+        injector.registerPool(ILogger.class, ConsoleLogger.class, poolLimit);
+
+        System.out.println("Requesting 5 objects consecutively with a pool limit of = " + poolLimit);
+
+        ILogger l1 = injector.getInstance(ILogger.class);
+        ILogger l2 = injector.getInstance(ILogger.class);
+        ILogger l3 = injector.getInstance(ILogger.class);
+        ILogger l4 = injector.getInstance(ILogger.class);
+        ILogger l5 = injector.getInstance(ILogger.class);
+
+        System.out.println("Instance 1: " + Integer.toHexString(l1.hashCode()));
+        System.out.println("Instance 2: " + Integer.toHexString(l2.hashCode()));
+        System.out.println("Instance 3: " + Integer.toHexString(l3.hashCode()));
+        System.out.println("Instance 4: " + Integer.toHexString(l4.hashCode()));
+        System.out.println("Instance 5: " + Integer.toHexString(l5.hashCode()));
+
+        System.out.println("\nПроверка равенства ссылок:");
+        System.out.println("l1 == l4 ? " + (l1 == l4));
+        System.out.println("l2 == l5 ? " + (l2 == l5));
+    }
+
+    private static void demoFactoryMethod() {
+        Injector injector = new Injector();
+
+        injector.register(ILogger.class, ConsoleLogger::new);
+
+        ILogger logger1 = injector.getInstance(ILogger.class);
+        logger1.log("This logger was created via a Factory Method (Supplier)!");
+    }
+
+    private static void demoFoolProofing() {
+        Injector injector = new Injector();
+
+        executeWithErrorHandling("1. Null registration attempt", () ->
+                injector.register(null, ConsoleLogger.class, LifeStyle.SINGLETON)
+        );
+
+        executeWithErrorHandling("2. Abstract class/Interface registration attempt", () ->
+                injector.register((Class) ILogger.class, (Class) ILogger.class, LifeStyle.SINGLETON)
+        );
+
+        injector.register(ILogger.class, ConsoleLogger.class, LifeStyle.PER_REQUEST);
+
+        executeWithErrorHandling("3. Duplicate registration attempt", () ->
+                injector.register(ILogger.class, FileLogger.class, LifeStyle.SINGLETON)
+        );
+
+        executeWithErrorHandling("4. Requesting unregistered dependency", () ->
+                injector.getInstance(IUserService.class)
+        );
+
+        injector.register(INotificationService.class, SmsNotificationService.class, LifeStyle.SCOPED, "+1");
+
+        executeWithErrorHandling("5. Requesting SCOPED dependency without active scope", () ->
+                injector.getInstance(INotificationService.class)
+        );
+
+        executeWithErrorHandling("6. Nested scopes attempt", () -> {
+            try (Scope scope1 = injector.beginScope()) {
+                try (Scope scope2 = injector.beginScope()) {
+                    System.out.println("This won't be reached");
+                }
+            }
+        });
+
+        executeWithErrorHandling("7. Circular Dependency attempt", () -> {
+            Injector badInjector = new Injector();
+            badInjector.register(CircularClass.class, CircularClass.class, LifeStyle.PER_REQUEST);
+            badInjector.getInstance(CircularClass.class);
+        });
+    }
+    //endregion
+
+    //region Utilities
+    private static void executeWithErrorHandling(String actionDescription, Runnable action) {
+        System.out.println(actionDescription);
+        try {
+            action.run();
+            System.out.println("  -> SUCCESS (Unexpected!)");
+        } catch (Exception e) {
+            System.out.println("  -> BLOCKED: " + e.getClass().getSimpleName() + " - " + e.getMessage());
+        }
+        System.out.println();
+    }
+
+    public static class CircularClass {
+        public CircularClass(CircularClass selfDependency) { }
+    }
+    //endregion
 }
