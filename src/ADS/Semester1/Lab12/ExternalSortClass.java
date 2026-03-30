@@ -1,4 +1,4 @@
-package ADS.Lab12;
+package ADS.Semester1.Lab12;
 
 import java.io.*;
 import java.util.Random;

@@ -1,4 +1,4 @@
-package ADS.Lab4_11;
+package ADS.Semester1.Lab4_11;
 
 import java.util.Arrays;
 

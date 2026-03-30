@@ -1,4 +1,4 @@
-package ADS.Lab3;
+package ADS.Semester1.Lab3;
 
 /*
 Лаба №3 "Задача о простых множителях"

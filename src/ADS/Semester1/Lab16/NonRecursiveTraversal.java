@@ -1,4 +1,4 @@
-package ADS.Lab16;
+package ADS.Semester1.Lab16;
 
 import java.util.Stack;
 

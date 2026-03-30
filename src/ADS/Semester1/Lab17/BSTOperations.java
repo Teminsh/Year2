@@ -1,4 +1,4 @@
-package ADS.Lab17;
+package ADS.Semester1.Lab17;
 
 import java.util.Scanner;
 

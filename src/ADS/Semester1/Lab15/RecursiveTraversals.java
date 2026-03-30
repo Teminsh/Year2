@@ -1,4 +1,4 @@
-package ADS.Lab15;
+package ADS.Semester1.Lab15;
 
 public class RecursiveTraversals
 {

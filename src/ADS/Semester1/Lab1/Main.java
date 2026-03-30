@@ -1,4 +1,4 @@
-package ADS.Lab1;
+package ADS.Semester1.Lab1;
 
 import java.util.Scanner;
 import java.util.Stack;
