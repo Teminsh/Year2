@@ -98,7 +98,7 @@ public class Main {
 
     private static void demoPoolLifeStyle() {
         Injector injector = new Injector();
-        int poolLimit = 3;
+        int poolLimit = 2;
 
         injector.registerPool(ILogger.class, ConsoleLogger.class, poolLimit);
 

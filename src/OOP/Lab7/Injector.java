@@ -109,7 +109,7 @@ public class Injector {
     }
 
     private <T> T resolvePool(Binding<T> binding) {
-        synchronized (binding) {
+ //       synchronized (binding) {
             int count = binding.getRequestCount();
             binding.setRequestCount(count + 1);
 
@@ -120,7 +120,7 @@ public class Injector {
             } else {
                 return binding.getPoolInstances().get(count % binding.getLimit());
             }
-        }
+        //}
     }
 
     @SuppressWarnings("unchecked")
